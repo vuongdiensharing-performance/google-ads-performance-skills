@@ -30,9 +30,28 @@ class GA4QueryContractTests(unittest.TestCase):
         self.assertIsNotNone(canonical)
         self.assertEqual(canonical["query_id"], "GA4-CV-001")
         self.assertEqual(canonical["tool"], "run_report")
+        self.assertEqual(
+            canonical["request"]["date_ranges"],
+            [{"start_date": "2026-08-01", "end_date": "2026-08-10"}],
+        )
         self.assertEqual(canonical["request"]["dimensions"], ["sessionCampaignName"])
         self.assertEqual(canonical["request"]["metrics"], ["sessions", "conversions"])
         self.assertRegex(canonical["request_fingerprint"], r"^sha256:[0-9a-f]{64}$")
+
+    def test_valid_filter_is_compiled_into_provider_shape(self):
+        errors, canonical = validate(
+            self.fixture("ga4_query_contract.yaml"), self.schema, self.registry
+        )
+        self.assertEqual(errors, [])
+        self.assertEqual(
+            canonical["request"]["dimension_filter"],
+            {
+                "filter": {
+                    "field_name": "sessionCampaignName",
+                    "string_filter": {"match_type": "EXACT", "value": "campaign_a"},
+                }
+            },
+        )
 
     def test_arbitrary_metric_is_rejected(self):
         errors, canonical = validate(
