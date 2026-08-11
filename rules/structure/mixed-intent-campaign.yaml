@@ -1,0 +1,33 @@
+id: STR-INTENT-001
+name: Mixed Intent Campaign
+version: 1.0.0
+category: structure
+description: Flag a campaign that mixes materially different intent tiers while requiring different budgets, messaging, or evaluation criteria.
+when:
+  all:
+    - materially_different_intent_tiers_present == true
+    - shared_budget_or_bidding_causes_conflict == true
+exclude_when:
+  - combined_structure_is_intentional_and_validated == true
+severity:
+  level: medium
+confidence:
+  level: high
+evidence_required:
+  - campaign_structure
+  - intent_classification
+  - budget_or_bidding_configuration
+finding:
+  title: Campaign combines intent segments with conflicting optimization needs
+recommendation:
+  - evaluate_campaign_separation
+  - define_distinct_reporting_and_budget_controls
+impact:
+  dimension: measurement
+  level: medium
+action:
+  type: recommend
+human_approval_required: true
+related_skills:
+  - campaign-structure
+  - campaign-strategy
