@@ -1,9 +1,17 @@
 ---
 name: performance-diagnosis
-version: 1.1.0
+version: 1.2.0
 description: Diagnose Google Ads performance changes and identify evidence-backed drivers, business impact, actions, and measurement requirements.
 category: analytics
 status: core
+knowledge_dependencies:
+  - knowledge/analytics/performance-diagnosis.md
+  - knowledge/measurement/conversion-framework.md
+  - knowledge/bidding/bidding-principles.md
+rule_dependencies:
+  - rules/search-term/high-spend-zero-conversion.yaml
+  - rules/bidding/conversion-signal-risk.yaml
+  - rules/budget/scale-with-quality-risk.yaml
 ---
 # Performance Diagnosis
 ## Purpose
