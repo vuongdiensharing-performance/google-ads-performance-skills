@@ -1,0 +1,74 @@
+benchmark: account-audit-v1
+skill: account-audit
+purpose: End-to-end benchmark for the reference Skill.
+
+cases:
+  - id: healthy-lead-gen-account
+    class: PASS
+    context:
+      business_goal: qualified_leads
+      campaign_count: 4
+      fragmented_campaigns: false
+      conversion_tracking: valid
+      primary_conversion: qualified_lead
+      bidding_strategy: target_cpa
+      search_term_quality: high
+      budget_constraint: false
+    expected:
+      status: pass
+      priority: P3
+      confidence: high
+      approval_required: false
+
+  - id: broken-measurement-and-fragmentation
+    class: FAIL
+    context:
+      business_goal: qualified_leads
+      campaign_count: 31
+      fragmented_campaigns: true
+      conversion_tracking: broken
+      primary_conversion: micro_conversion
+      bidding_strategy: maximize_clicks
+      search_term_quality: low
+      budget_constraint: true
+    expected:
+      status: fail
+      required_findings:
+        - tracking-integrity-risk
+        - fragmentation-risk
+        - primary-micro-conversion
+      priority: P0
+      approval_required: true
+
+  - id: incomplete-account-export
+    class: INSUFFICIENT_EVIDENCE
+    context:
+      campaign_count: 10
+      conversion_tracking: unknown
+      primary_conversion: unknown
+      bidding_strategy: unknown
+      search_term_quality: unknown
+    expected:
+      status: insufficient_evidence
+      confidence: low
+      required_data:
+        - conversion_tracking
+        - primary_conversion
+        - bidding_strategy
+        - search_term_quality
+
+  - id: justified-fragmentation
+    class: FALSE_POSITIVE
+    context:
+      business_goal: qualified_leads
+      campaign_count: 18
+      fragmented_campaigns: true
+      fragmentation_reason: product_and_geo_controls
+      conversion_tracking: valid
+      primary_conversion: qualified_lead
+      bidding_strategy: target_cpa
+    expected:
+      status: no_finding
+      excluded_findings:
+        - fragmentation-risk
+      approval_required: false
