@@ -1,9 +1,15 @@
 ---
 name: ad-copy
-version: 1.1.1
+version: 1.2.0
 description: Create and improve Google Search ad copy using intent, message match, differentiation, constraints, and testable variants.
 category: creative
 status: core
+knowledge_dependencies:
+  - knowledge/ads/rsa-message-match.md
+  - knowledge/keyword/keyword-intent.md
+rule_dependencies:
+  - rules/ad/excessive-pinning.yaml
+  - rules/ad/message-match-gap.yaml
 ---
 # Ad Copy
 ## Purpose
