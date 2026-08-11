@@ -1,0 +1,37 @@
+id: KW-BROAD-001
+name: Broad match without conversion-oriented Smart Bidding
+version: 1.0.0
+category: bidding
+description: Identify broad-match usage that lacks a conversion-oriented bidding context.
+when:
+  match_type: broad
+  bidding_strategy:
+    not_in:
+      - maximize_conversions
+      - target_cpa
+      - maximize_conversion_value
+      - target_roas
+exclude_when: []
+evidence_required:
+  - keyword_match_type
+  - campaign_bidding_strategy
+severity:
+  level: high
+confidence:
+  level: high
+finding:
+  title: Broad match without conversion-oriented Smart Bidding
+recommendation:
+  - review_bidding_strategy
+  - verify_conversion_volume_and_quality
+impact:
+  dimensions:
+    - efficiency
+    - wasted_spend
+  level: high
+action:
+  type: investigate
+human_approval_required: false
+related_skills:
+  - keyword-research
+  - bidding-strategy
