@@ -1,9 +1,15 @@
 ---
 name: conversion-tracking
-version: 1.1.0
+version: 1.2.0
 description: Audit Google Ads conversion measurement for correctness, business relevance, attribution, and data quality.
 category: measurement
 status: core
+knowledge_dependencies:
+  - knowledge/measurement/conversion-framework.md
+rule_dependencies:
+  - rules/conversion/primary-micro-conversion.yaml
+  - rules/conversion/tracking-integrity-risk.yaml
+  - rules/conversion/lead-quality-gap.yaml
 ---
 # Conversion Tracking
 ## Purpose
