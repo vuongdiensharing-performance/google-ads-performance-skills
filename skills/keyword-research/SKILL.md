@@ -1,6 +1,6 @@
 ---
 name: keyword-research
-version: 1.2.0
+version: 1.2.1
 description: Research and organize Google Ads keywords by intent, theme, match strategy, opportunity, and exclusions.
 category: acquisition
 status: core
@@ -10,7 +10,7 @@ knowledge_dependencies:
   - knowledge/strategy/intent-framework.md
 rule_dependencies:
   - rules/keyword/intent-theme-mismatch.yaml
-  - rules/bidding/broad-without-smart-bidding.yaml
+  - rules/keyword/broad-without-smart-bidding.yaml
 ---
 # Keyword Research
 ## Purpose
@@ -33,7 +33,7 @@ Define business-relevant intent classes and exclusion criteria before expansion.
 - `knowledge/strategy/intent-framework.md`
 ## Rule Dependencies
 - `rules/keyword/intent-theme-mismatch.yaml`
-- `rules/bidding/broad-without-smart-bidding.yaml`
+- `rules/keyword/broad-without-smart-bidding.yaml`
 ## Workflow
 1. Build seed themes.
 2. Expand semantic/problem-aware variants.
