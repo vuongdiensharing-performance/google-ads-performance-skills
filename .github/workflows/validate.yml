@@ -21,6 +21,14 @@ jobs:
       - run: python scripts/validate_skills.py --skills skills --registry skills/registry.yaml
       - run: python scripts/evaluate_fixtures.py --fixtures evals/fixtures
       - run: python scripts/evaluate_gemini_account_audit.py --mode offline
+      - name: Validate Gate 2C boundary contracts
+        run: >-
+          python scripts/validate_boundary_contract.py
+          --rules rules
+          --registry rules/registry.yaml
+          --rule-ids STR-FRAG-001 CV-TRACK-001 BID-OBJ-001 BUD-OPP-001 ST-SPEND-001 PMAX-GOAL-001
+      - name: Run Gate 2C boundary matrix
+        run: python scripts/test_boundary_machine.py --fixtures evals/account-audit/boundary_matrix.yaml --runs 5
 
   security:
     runs-on: ubuntu-latest

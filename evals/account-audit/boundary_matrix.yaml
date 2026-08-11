@@ -1,0 +1,320 @@
+version: "1.0.0"
+contract: docs/RULE_BOUNDARY_CONTRACT.md
+cases:
+  - case_id: STR-FRAG-A
+    rule_id: STR-FRAG-001
+    context:
+      structure_analysis_in_scope: true
+      fragmentation_risk_signal: false
+      campaign_structure: {present: true}
+      intent_mapping: {present: true}
+      volume_or_conversion_density: {present: true}
+      separation_reason: none
+    expected: {state: APPLICABLE_VALID, decision: PASS}
+  - case_id: STR-FRAG-B
+    rule_id: STR-FRAG-001
+    context:
+      structure_analysis_in_scope: true
+      fragmentation_risk_signal: true
+      campaign_structure: {present: true}
+      intent_mapping: {present: true}
+      volume_or_conversion_density: {present: true}
+      separation_reason: none
+    expected: {state: APPLICABLE_TRIGGERED, decision: FAIL}
+  - case_id: STR-FRAG-C
+    rule_id: STR-FRAG-001
+    context:
+      structure_analysis_in_scope: true
+      fragmentation_risk_signal: true
+      campaign_structure: {present: true}
+      intent_mapping: {present: true}
+      volume_or_conversion_density: {present: true}
+    expected: {state: APPLICABLE_MISSING_EVIDENCE, decision: INSUFFICIENT_EVIDENCE}
+  - case_id: STR-FRAG-D
+    rule_id: STR-FRAG-001
+    context: {structure_analysis_in_scope: false}
+    expected: {state: NOT_APPLICABLE, decision: NOT_APPLICABLE}
+  - case_id: STR-FRAG-E
+    rule_id: STR-FRAG-001
+    context:
+      structure_analysis_in_scope: true
+      fragmentation_risk_signal: true
+      campaign_structure: {present: true}
+      intent_mapping: {present: true}
+      volume_or_conversion_density: {present: true}
+      separation_reason: none
+      geography_or_business_unit_requires_separation: true
+    expected: {state: CONFLICTING_EVIDENCE, decision: FAIL}
+  - case_id: STR-FRAG-F
+    rule_id: STR-FRAG-001
+    context:
+      structure_analysis_in_scope: true
+      fragmentation_risk_signal: true
+      campaign_structure: {present: true}
+      intent_mapping: {present: true}
+      volume_or_conversion_density: {present: true}
+      separation_reason: distinct_location_budgets
+    expected: {state: EXPLICIT_EXCLUSION, decision: SUPPRESSED}
+
+  - case_id: CV-TRACK-A
+    rule_id: CV-TRACK-001
+    context:
+      conversion_tracking_in_scope: true
+      tracking_validation: {status: passed}
+      conversion_action_configuration: {present: true}
+      test_event_or_debug_evidence: {present: true}
+    expected: {state: APPLICABLE_VALID, decision: PASS}
+  - case_id: CV-TRACK-B
+    rule_id: CV-TRACK-001
+    context:
+      conversion_tracking_in_scope: true
+      tracking_validation: {status: failed}
+      conversion_action_configuration: {present: true}
+      test_event_or_debug_evidence: {present: true}
+      debug_validation: {status: failed}
+    expected: {state: APPLICABLE_TRIGGERED, decision: FAIL}
+  - case_id: CV-TRACK-C
+    rule_id: CV-TRACK-001
+    context:
+      conversion_tracking_in_scope: true
+      tracking_validation: {status: failed}
+      conversion_action_configuration: {present: true}
+    expected: {state: APPLICABLE_MISSING_EVIDENCE, decision: INSUFFICIENT_EVIDENCE}
+  - case_id: CV-TRACK-D
+    rule_id: CV-TRACK-001
+    context: {conversion_tracking_in_scope: false}
+    expected: {state: NOT_APPLICABLE, decision: NOT_APPLICABLE}
+  - case_id: CV-TRACK-E
+    rule_id: CV-TRACK-001
+    context:
+      conversion_tracking_in_scope: true
+      tracking_validation: {status: failed}
+      conversion_action_configuration: {present: true}
+      test_event_or_debug_evidence: {present: true}
+      debug_validation: {status: passed}
+    expected: {state: CONFLICTING_EVIDENCE, decision: FAIL}
+  - case_id: CV-TRACK-F
+    rule_id: CV-TRACK-001
+    context:
+      conversion_tracking_in_scope: true
+      tracking_validation: {status: failed}
+      conversion_action_configuration: {present: true}
+      test_event_or_debug_evidence: {present: true}
+      debug_validation: {status: failed}
+      issue_is_known_and_documented: true
+    expected: {state: EXPLICIT_EXCLUSION, decision: SUPPRESSED}
+
+  - case_id: BID-OBJ-A
+    rule_id: BID-OBJ-001
+    context:
+      smart_bidding_in_scope: true
+      business_objective: {present: true}
+      business_objective_defined: true
+      bidding_strategy: {objective_alignment: aligned}
+      primary_conversion_goal: {present: true}
+    expected: {state: APPLICABLE_VALID, decision: PASS}
+  - case_id: BID-OBJ-B
+    rule_id: BID-OBJ-001
+    context:
+      smart_bidding_in_scope: true
+      business_objective: {present: true}
+      business_objective_defined: true
+      bidding_strategy: {objective_alignment: mismatch}
+      primary_conversion_goal: {present: true}
+    expected: {state: APPLICABLE_TRIGGERED, decision: FAIL}
+  - case_id: BID-OBJ-C
+    rule_id: BID-OBJ-001
+    context:
+      smart_bidding_in_scope: true
+      business_objective: {present: true}
+      business_objective_defined: true
+      bidding_strategy: {objective_alignment: mismatch}
+    expected: {state: APPLICABLE_MISSING_EVIDENCE, decision: INSUFFICIENT_EVIDENCE}
+  - case_id: BID-OBJ-D
+    rule_id: BID-OBJ-001
+    context: {smart_bidding_in_scope: false}
+    expected: {state: NOT_APPLICABLE, decision: NOT_APPLICABLE}
+  - case_id: BID-OBJ-E
+    rule_id: BID-OBJ-001
+    context:
+      smart_bidding_in_scope: true
+      business_objective: {present: true}
+      business_objective_defined: true
+      bidding_strategy: {objective_alignment: aligned}
+      primary_conversion_goal: {present: true}
+      mismatch_flag: true
+    expected: {state: CONFLICTING_EVIDENCE, decision: FAIL}
+  - case_id: BID-OBJ-F
+    rule_id: BID-OBJ-001
+    context:
+      smart_bidding_in_scope: true
+      business_objective: {present: true}
+      business_objective_defined: true
+      bidding_strategy: {objective_alignment: mismatch}
+      primary_conversion_goal: {present: true}
+      objective_definition_is_ambiguous: true
+    expected: {state: EXPLICIT_EXCLUSION, decision: SUPPRESSED}
+
+  - case_id: BUD-OPP-A
+    rule_id: BUD-OPP-001
+    context:
+      budget_analysis_in_scope: true
+      budget_status: {present: true}
+      budget_limited: false
+      performance_metrics: {present: true}
+      performance: {meets_business_target: true}
+      business_target: {present: true}
+      evidence: {incremental_opportunity_validated: true}
+    expected: {state: APPLICABLE_VALID, decision: PASS}
+  - case_id: BUD-OPP-B
+    rule_id: BUD-OPP-001
+    context:
+      budget_analysis_in_scope: true
+      budget_status: {present: true}
+      budget_limited: true
+      performance_metrics: {present: true}
+      performance: {meets_business_target: true}
+      business_target: {present: true}
+      evidence: {incremental_opportunity_validated: true}
+    expected: {state: APPLICABLE_TRIGGERED, decision: FAIL}
+  - case_id: BUD-OPP-C
+    rule_id: BUD-OPP-001
+    context:
+      budget_analysis_in_scope: true
+      budget_status: {present: true}
+      budget_limited: true
+      performance_metrics: {present: true}
+      performance: {meets_business_target: true}
+      business_target: {present: true}
+    expected: {state: APPLICABLE_MISSING_EVIDENCE, decision: INSUFFICIENT_EVIDENCE}
+  - case_id: BUD-OPP-D
+    rule_id: BUD-OPP-001
+    context: {budget_analysis_in_scope: false}
+    expected: {state: NOT_APPLICABLE, decision: NOT_APPLICABLE}
+  - case_id: BUD-OPP-E
+    rule_id: BUD-OPP-001
+    context:
+      budget_analysis_in_scope: true
+      budget_status: {present: true}
+      budget_limited: true
+      performance_metrics: {present: true}
+      performance: {meets_business_target: true}
+      business_target: {present: true}
+      evidence: {incremental_opportunity_validated: true}
+      target_met: false
+    expected: {state: CONFLICTING_EVIDENCE, decision: FAIL}
+  - case_id: BUD-OPP-F
+    rule_id: BUD-OPP-001
+    context:
+      budget_analysis_in_scope: true
+      budget_status: {present: true}
+      budget_limited: true
+      performance_metrics: {present: true}
+      performance: {meets_business_target: true}
+      business_target: {present: true}
+      evidence: {incremental_opportunity_validated: true}
+      conversion_tracking_is_unreliable: true
+    expected: {state: EXPLICIT_EXCLUSION, decision: SUPPRESSED}
+
+  - case_id: ST-SPEND-A
+    rule_id: ST-SPEND-001
+    context:
+      search_term_analysis_in_scope: true
+      spend: 0
+      conversions: 0
+      target_conversion_definition: {present: true}
+      conversion_lag: {present: true}
+      evidence: {spend_is_material: false}
+    expected: {state: APPLICABLE_VALID, decision: PASS}
+  - case_id: ST-SPEND-B
+    rule_id: ST-SPEND-001
+    context:
+      search_term_analysis_in_scope: true
+      spend: 100
+      conversions: 0
+      target_conversion_definition: {present: true}
+      conversion_lag: {present: true}
+      evidence: {spend_is_material: true}
+    expected: {state: APPLICABLE_TRIGGERED, decision: FAIL}
+  - case_id: ST-SPEND-C
+    rule_id: ST-SPEND-001
+    context:
+      search_term_analysis_in_scope: true
+      spend: 100
+      conversions: 0
+      target_conversion_definition: {present: true}
+    expected: {state: APPLICABLE_MISSING_EVIDENCE, decision: INSUFFICIENT_EVIDENCE}
+  - case_id: ST-SPEND-D
+    rule_id: ST-SPEND-001
+    context: {search_term_analysis_in_scope: false}
+    expected: {state: NOT_APPLICABLE, decision: NOT_APPLICABLE}
+  - case_id: ST-SPEND-E
+    rule_id: ST-SPEND-001
+    context:
+      search_term_analysis_in_scope: true
+      spend: 0
+      conversions: 0
+      target_conversion_definition: {present: true}
+      conversion_lag: {present: true}
+      evidence: {spend_is_material: true}
+      material: true
+    expected: {state: CONFLICTING_EVIDENCE, decision: FAIL}
+  - case_id: ST-SPEND-F
+    rule_id: ST-SPEND-001
+    context:
+      search_term_analysis_in_scope: true
+      spend: 100
+      conversions: 0
+      target_conversion_definition: {present: true}
+      conversion_lag: {present: true}
+      evidence: {spend_is_material: true}
+      tracking_integrity_unknown: true
+    expected: {state: EXPLICIT_EXCLUSION, decision: SUPPRESSED}
+
+  - case_id: PMAX-GOAL-A
+    rule_id: PMAX-GOAL-001
+    context:
+      campaign_type: performance_max
+      campaign_objective: {present: true}
+      primary_conversion_goal: {status: valid}
+      conversion_tracking_status: {present: true}
+    expected: {state: APPLICABLE_VALID, decision: PASS}
+  - case_id: PMAX-GOAL-B
+    rule_id: PMAX-GOAL-001
+    context:
+      campaign_type: performance_max
+      campaign_objective: {present: true}
+      primary_conversion_goal: {status: missing}
+      conversion_tracking_status: {present: true}
+    expected: {state: APPLICABLE_TRIGGERED, decision: FAIL}
+  - case_id: PMAX-GOAL-C
+    rule_id: PMAX-GOAL-001
+    context:
+      campaign_type: performance_max
+      campaign_objective: {present: true}
+      conversion_tracking_status: {present: true}
+    expected: {state: APPLICABLE_MISSING_EVIDENCE, decision: INSUFFICIENT_EVIDENCE}
+  - case_id: PMAX-GOAL-D
+    rule_id: PMAX-GOAL-001
+    context:
+      campaign_type: search
+    expected: {state: NOT_APPLICABLE, decision: NOT_APPLICABLE}
+  - case_id: PMAX-GOAL-E
+    rule_id: PMAX-GOAL-001
+    context:
+      campaign_type: performance_max
+      campaign_objective: {present: true}
+      primary_conversion_goal: {status: missing}
+      conversion_tracking_status: {present: true}
+      override: true
+    expected: {state: CONFLICTING_EVIDENCE, decision: FAIL}
+  - case_id: PMAX-GOAL-F
+    rule_id: PMAX-GOAL-001
+    context:
+      campaign_type: performance_max
+      campaign_objective: {present: true}
+      primary_conversion_goal: {status: missing}
+      conversion_tracking_status: {present: true}
+      campaign_is_intentionally_unoptimized_for_goal_exploration: true
+      override: false
+    expected: {state: EXPLICIT_EXCLUSION, decision: SUPPRESSED}

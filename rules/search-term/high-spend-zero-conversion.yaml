@@ -1,6 +1,6 @@
 id: ST-SPEND-001
 name: High Spend Without Conversion
-version: 1.0.1
+version: 1.1.0
 category: search_term
 description: Flag a search term that has consumed meaningful spend without a recorded target conversion.
 when:
@@ -41,3 +41,31 @@ knowledge_dependencies:
   - knowledge/search/search-term-methodology.md
   - knowledge/measurement/conversion-framework.md
   - knowledge/analytics/performance-diagnosis.md
+boundary_contract:
+  version: "1.0.0"
+  applicable_when:
+    - search_term_analysis_in_scope: true
+  evidence_required:
+    - spend
+    - conversions
+    - target_conversion_definition
+    - conversion_lag
+  states:
+    A: {state: APPLICABLE_VALID}
+    B: {state: APPLICABLE_TRIGGERED}
+    C: {state: APPLICABLE_MISSING_EVIDENCE}
+    D: {state: NOT_APPLICABLE}
+    E: {state: CONFLICTING_EVIDENCE}
+    F: {state: EXPLICIT_EXCLUSION}
+  conflict_policy:
+    enabled: true
+    when:
+      all:
+        - spend: 0
+        - conversions: 0
+        - evidence.spend_is_material: true
+        - material: true
+    resolution:
+      state: CONFLICTING_EVIDENCE
+      decision: FAIL
+      inference_used: false
