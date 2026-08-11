@@ -1,6 +1,6 @@
 id: CV-TRACK-001
 name: Conversion Tracking Integrity Risk
-version: 1.0.0
+version: 1.0.1
 category: conversion
 description: Flag a conversion setup when tracking validation identifies material duplication, missing firing, or attribution integrity issues.
 when:
@@ -32,3 +32,6 @@ related_skills:
   - performance-diagnosis
   - bidding-strategy
   - account-audit
+knowledge_dependencies:
+  - knowledge/measurement/conversion-framework.md
+  - knowledge/analytics/performance-diagnosis.md
