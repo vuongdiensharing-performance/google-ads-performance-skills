@@ -1,9 +1,16 @@
 ---
 name: negative-keyword-mining
-version: 1.1.0
+version: 1.2.0
 description: Identify, classify, and prioritize negative keyword candidates from search-term evidence and business relevance.
 category: acquisition
 status: core
+knowledge_dependencies:
+  - knowledge/keyword/keyword-intent.md
+  - knowledge/keyword/match-types.md
+  - knowledge/search/search-term-methodology.md
+rule_dependencies:
+  - rules/search-term/irrelevant-intent.yaml
+  - rules/search-term/high-spend-zero-conversion.yaml
 ---
 # Negative Keyword Mining
 ## Purpose
