@@ -1,8 +1,6 @@
 import unittest
 from pathlib import Path
 
-import yaml
-
 from scripts.validate_ga4_query import (
     REGISTRY_PATH,
     SCHEMA_PATH,
@@ -64,7 +62,8 @@ class GA4QueryContractTests(unittest.TestCase):
         contract = self.fixture("ga4_query_contract.yaml")
         first_errors, first = validate(contract, self.schema, self.registry)
         second_errors, second = validate(contract, self.schema, self.registry)
-        self.assertEqual(first_errors, second_errors, [])
+        self.assertEqual(first_errors, second_errors)
+        self.assertEqual(first_errors, [])
         self.assertEqual(first["request_fingerprint"], second["request_fingerprint"])
 
 
