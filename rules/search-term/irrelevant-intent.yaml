@@ -1,6 +1,6 @@
 id: ST-IRRELEVANT-001
 name: Irrelevant Search Intent
-version: 1.0.0
+version: 1.0.1
 category: search_term
 description: Flag search terms whose intent is clearly outside the advertised offer.
 when:
@@ -31,3 +31,6 @@ human_approval_required: true
 related_skills:
   - search-term-analysis
   - negative-keyword-mining
+knowledge_dependencies:
+  - knowledge/search/search-term-methodology.md
+  - knowledge/keyword/keyword-intent.md
