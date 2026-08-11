@@ -1,0 +1,36 @@
+id: KW-QS-001
+name: Low Quality Score Investigation
+version: 1.0.0
+category: keyword
+description: Flag low Quality Score as an investigation trigger, never as an automatic pause signal.
+when:
+  all:
+    - quality_score_available == true
+    - quality_score < 5
+exclude_when:
+  - keyword_has_insufficient_impression_history == true
+severity:
+  level: low
+confidence:
+  level: high
+evidence_required:
+  - quality_score
+  - expected_ctr_component
+  - ad_relevance_component
+  - landing_page_experience_component
+finding:
+  title: Keyword has below-mid Quality Score and warrants component review
+recommendation:
+  - inspect_expected_ctr
+  - inspect_ad_relevance
+  - inspect_landing_page_experience
+impact:
+  dimension: efficiency
+  level: low
+action:
+  type: investigate
+human_approval_required: false
+related_skills:
+  - quality-score
+  - ad-copy
+  - landing-page-audit
