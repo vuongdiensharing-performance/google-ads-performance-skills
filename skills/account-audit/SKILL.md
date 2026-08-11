@@ -1,9 +1,38 @@
 ---
 name: account-audit
-version: 1.1.0
+version: 1.2.0
 description: Run a read-only, evidence-gated Google Ads account health audit and turn findings into a prioritized action plan.
 category: audit
 status: core
+knowledge_dependencies:
+  - knowledge/structure/account-structure.md
+  - knowledge/strategy/intent-framework.md
+  - knowledge/bidding/bidding-principles.md
+  - knowledge/measurement/conversion-framework.md
+  - knowledge/analytics/performance-diagnosis.md
+rule_dependencies:
+  - rules/structure/fragmentation-risk.yaml
+  - rules/structure/mixed-intent-campaign.yaml
+  - rules/bidding/objective-strategy-mismatch.yaml
+  - rules/bidding/frequent-target-changes.yaml
+  - rules/bidding/conversion-signal-risk.yaml
+  - rules/search-term/irrelevant-intent.yaml
+  - rules/search-term/high-spend-zero-conversion.yaml
+  - rules/search-term/expansion-candidate.yaml
+  - rules/conversion/tracking-integrity-risk.yaml
+  - rules/conversion/lead-quality-gap.yaml
+  - rules/budget/budget-constraint-opportunity.yaml
+  - rules/budget/scale-with-quality-risk.yaml
+conditional_rule_dependencies:
+  - when: search_ads_or_ad_assets_present
+    rules:
+      - rules/ad/excessive-pinning.yaml
+      - rules/ad/message-match-gap.yaml
+  - when: pmax_or_shopping_campaign_present
+    rules:
+      - rules/pmax/primary-goal-missing.yaml
+      - rules/pmax/recent-change-learning.yaml
+      - rules/pmax/overrestrictive-negative.yaml
 ---
 
 # Account Audit
@@ -43,12 +72,27 @@ Orchestrate Core Skills and the Rule Engine to assess measurement, structure, ta
 - `knowledge/analytics/performance-diagnosis.md`
 
 ## Rule Dependencies
-- Structure fragmentation and mixed-intent Rules.
-- Bidding objective, target-change, and conversion-signal Rules.
-- Search-term waste and expansion Rules.
-- Conversion integrity and lead-quality Rules.
-- Budget opportunity and scaling-risk Rules.
-- Ad, PMax, and campaign-type Rules when applicable.
+- `rules/structure/fragmentation-risk.yaml`
+- `rules/structure/mixed-intent-campaign.yaml`
+- `rules/bidding/objective-strategy-mismatch.yaml`
+- `rules/bidding/frequent-target-changes.yaml`
+- `rules/bidding/conversion-signal-risk.yaml`
+- `rules/search-term/irrelevant-intent.yaml`
+- `rules/search-term/high-spend-zero-conversion.yaml`
+- `rules/search-term/expansion-candidate.yaml`
+- `rules/conversion/tracking-integrity-risk.yaml`
+- `rules/conversion/lead-quality-gap.yaml`
+- `rules/budget/budget-constraint-opportunity.yaml`
+- `rules/budget/scale-with-quality-risk.yaml`
+
+### Conditional Rule Dependencies
+- When Search ads or ad assets are present:
+  - `rules/ad/excessive-pinning.yaml`
+  - `rules/ad/message-match-gap.yaml`
+- When PMax or Shopping campaigns are present:
+  - `rules/pmax/primary-goal-missing.yaml`
+  - `rules/pmax/recent-change-learning.yaml`
+  - `rules/pmax/overrestrictive-negative.yaml`
 
 ## Workflow
 1. **Validate** scope, lookback, evidence coverage, and gaps.
