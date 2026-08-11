@@ -1,13 +1,11 @@
 id: STR-FRAG-001
 name: Campaign Fragmentation Risk
-version: 1.0.0
+version: 1.0.1
 category: structure
-description: Flag excessive campaign or ad-group fragmentation when materially similar intent and economics are split without a control or reporting requirement.
+description: Flag excessive campaign or ad-group fragmentation when a normalized fragmentation-risk signal is present and no valid control or reporting requirement justifies the separation.
 when:
   all:
-    - campaigns_have_materially_similar_intent == true
-    - fragmentation_reason == none
-    - evidence.data_density_is_low == true
+    - fragmentation_risk_signal == true
 exclude_when:
   - budget_or_bidding_control_requires_separation == true
   - geography_or_business_unit_requires_separation == true
