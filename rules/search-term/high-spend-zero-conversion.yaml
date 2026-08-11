@@ -1,6 +1,6 @@
 id: ST-SPEND-001
 name: High Spend Without Conversion
-version: 1.0.0
+version: 1.0.1
 category: search_term
 description: Flag a search term that has consumed meaningful spend without a recorded target conversion.
 when:
@@ -37,3 +37,7 @@ related_skills:
   - search-term-analysis
   - performance-diagnosis
   - conversion-tracking
+knowledge_dependencies:
+  - knowledge/search/search-term-methodology.md
+  - knowledge/measurement/conversion-framework.md
+  - knowledge/analytics/performance-diagnosis.md
