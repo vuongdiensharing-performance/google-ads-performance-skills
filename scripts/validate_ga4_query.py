@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate and canonicalize a GA4 Query Contract against the registered catalog."""
+"""Validate and canonicalize a GA4 Query Contract against the catalog."""
 
 from __future__ import annotations
 
@@ -45,25 +45,56 @@ def catalog_for_query(registry: dict[str, Any], query_id: str) -> dict[str, Any]
 
 def validate_schema(contract: dict[str, Any], schema: dict[str, Any]) -> list[str]:
     validator = Draft202012Validator(schema, format_checker=FormatChecker())
-    return [error.message for error in sorted(validator.iter_errors(contract), key=lambda item: list(item.path))]
+    return [
+        error.message
+        for error in sorted(validator.iter_errors(contract), key=lambda item: list(item.path))
+    ]
+
+
+def _compile_dimension_filter(filters: dict[str, str]) -> dict[str, Any] | None:
+    expressions = [
+        {
+            "filter": {
+                "field_name": name,
+                "string_filter": {"match_type": "EXACT", "value": value},
+            }
+        }
+        for name, value in sorted(filters.items())
+    ]
+    if not expressions:
+        return None
+    if len(expressions) == 1:
+        return expressions[0]
+    return {"and_group": {"expressions": expressions}}
 
 
 def canonical_request(contract: dict[str, Any], catalog: dict[str, Any]) -> dict[str, Any]:
+    """Build the exact provider request that crosses the MCP boundary.
+
+    The returned request is also the evidence-contract request and therefore the
+    sole object used for request fingerprinting. This prevents a second,
+    semantically different representation from being fingerprinted later.
+    """
     filters = contract.get("filters", {})
-    return {
-        "tool": catalog["tool"],
-        "request": {
-            "property_id": contract["property_id"],
-            "date_range": contract["date_range"],
-            "dimensions": catalog.get("allowed_dimensions", []),
-            "metrics": catalog.get("required_metrics", []),
-            "filters": filters,
-        },
+    request: dict[str, Any] = {
+        "property_id": contract["property_id"],
+        "date_ranges": [contract["date_range"]],
+        "dimensions": catalog.get("allowed_dimensions", []),
+        "metrics": catalog.get("required_metrics", []),
     }
+    dimension_filter = _compile_dimension_filter(filters)
+    if dimension_filter is not None:
+        request["dimension_filter"] = dimension_filter
+    return {"tool": catalog["tool"], "request": request}
 
 
 def fingerprint(canonical: dict[str, Any]) -> str:
-    encoded = json.dumps(canonical, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    encoded = json.dumps(
+        canonical,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
     return f"sha256:{hashlib.sha256(encoded).hexdigest()}"
 
 
@@ -92,7 +123,11 @@ def validate_semantics(contract: dict[str, Any], catalog: dict[str, Any]) -> lis
     return errors
 
 
-def validate(contract: dict[str, Any], schema: dict[str, Any], registry: dict[str, Any]) -> tuple[list[str], dict[str, Any] | None]:
+def validate(
+    contract: dict[str, Any],
+    schema: dict[str, Any],
+    registry: dict[str, Any],
+) -> tuple[list[str], dict[str, Any] | None]:
     errors = validate_schema(contract, schema)
     if errors:
         return errors, None
@@ -102,14 +137,22 @@ def validate(contract: dict[str, Any], schema: dict[str, Any], registry: dict[st
         if errors:
             return errors, None
         canonical = canonical_request(contract, catalog)
-        return [], {**canonical, "query_id": contract["query_id"], "request_fingerprint": fingerprint(canonical)}
+        return [], {
+            **canonical,
+            "query_id": contract["query_id"],
+            "request_fingerprint": fingerprint(canonical),
+        }
     except Exception as exc:
         return [str(exc)], None
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate a GA4 Query Contract.")
-    parser.add_argument("--fixture", type=Path, default=ROOT / "evals/ga4/ga4_query_contract.yaml")
+    parser.add_argument(
+        "--fixture",
+        type=Path,
+        default=ROOT / "evals/ga4/ga4_query_contract.yaml",
+    )
     args = parser.parse_args()
 
     try:
