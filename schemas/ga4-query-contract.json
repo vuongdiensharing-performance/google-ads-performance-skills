@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ga4-query-contract/v1",
+  "title": "Google Analytics Query Contract",
+  "description": "Canonical allowlisted query request for the read-only Google Analytics MCP adapter. It does not permit arbitrary GA4 dimensions, metrics, filters, or tools.",
+  "type": "object",
+  "required": ["query_id", "property_id", "date_range"],
+  "additionalProperties": false,
+  "properties": {
+    "query_id": { "type": "string", "pattern": "^GA4-[A-Z0-9-]+$" },
+    "property_id": { "type": "string", "pattern": "^properties/[0-9]+$" },
+    "date_range": {
+      "type": "object",
+      "required": ["start_date", "end_date"],
+      "additionalProperties": false,
+      "properties": {
+        "start_date": { "type": "string", "format": "date" },
+        "end_date": { "type": "string", "format": "date" }
+      }
+    },
+    "filters": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sessionCampaignName": { "type": "string", "minLength": 1 },
+        "sessionSource": { "type": "string", "minLength": 1 },
+        "sessionMedium": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

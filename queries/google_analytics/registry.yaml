@@ -1,0 +1,16 @@
+version: "1.0.0"
+schema: ga4-query-contract/v1
+
+query_source_of_truth: queries/google_analytics/*.yaml
+execution_policy:
+  tool: run_report
+  mode: read_only
+  arbitrary_dimensions_allowed: false
+  arbitrary_metrics_allowed: false
+  arbitrary_filters_allowed: false
+
+queries:
+  - id: GA4-CV-001
+    path: queries/google_analytics/conversion-tracking.yaml
+    purpose: conversion_tracking
+    tool: run_report

@@ -1,0 +1,27 @@
+query_id: GA4-CV-001
+version: "1.0.0"
+purpose: conversion_tracking
+tool: run_report
+
+allowed_dimensions:
+  - sessionCampaignName
+
+required_metrics:
+  - sessions
+  - conversions
+
+allowed_filters:
+  - sessionCampaignName
+  - sessionSource
+  - sessionMedium
+
+constraints:
+  property_id_required: true
+  date_range_required: true
+  start_date_must_not_follow_end_date: true
+  arbitrary_dimensions: false
+  arbitrary_metrics: false
+  arbitrary_filters: false
+
+output:
+  evidence_type: GA4_REPORT
