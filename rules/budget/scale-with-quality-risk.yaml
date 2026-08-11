@@ -1,6 +1,6 @@
 id: BUD-SCALE-001
 name: Scale With Declining Conversion Quality
-version: 1.0.0
+version: 1.0.1
 category: budget
 description: Flag budget increases when spend or lead volume is rising while business-qualified conversion rate is deteriorating.
 when:
@@ -35,3 +35,6 @@ related_skills:
   - budget-optimization
   - performance-diagnosis
   - conversion-tracking
+knowledge_dependencies:
+  - knowledge/analytics/performance-diagnosis.md
+  - knowledge/measurement/conversion-framework.md
