@@ -1,9 +1,17 @@
 ---
 name: pmax-optimization
-version: 1.1.0
+version: 1.2.0
 description: Diagnose and optimize Performance Max using asset, audience, conversion, budget, and available placement/search evidence.
 category: campaign-type
 status: core
+knowledge_dependencies:
+  - knowledge/pmax/pmax-principles.md
+  - knowledge/pmax/pmax-b2b.md
+  - knowledge/measurement/conversion-framework.md
+rule_dependencies:
+  - rules/pmax/primary-goal-missing.yaml
+  - rules/pmax/recent-change-learning.yaml
+  - rules/pmax/overrestrictive-negative.yaml
 ---
 # Performance Max Optimization
 ## Purpose
