@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ga4-evidence-contract/v1",
+  "title": "Google Analytics Evidence Contract",
+  "description": "Provider-neutral evidence envelope for read-only Google Analytics MCP results. This contract does not define Rule semantics or Boundary State decisions.",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "evidence_type",
+    "source",
+    "request",
+    "result",
+    "provenance"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "1.0.0"
+    },
+    "evidence_type": {
+      "const": "GA4_REPORT"
+    },
+    "source": {
+      "type": "object",
+      "required": ["provider", "transport", "tool", "property_id"],
+      "additionalProperties": false,
+      "properties": {
+        "provider": { "const": "google_analytics" },
+        "transport": { "const": "mcp" },
+        "tool": {
+          "type": "string",
+          "enum": [
+            "get_account_summaries",
+            "get_property_details",
+            "list_google_ads_links",
+            "run_report",
+            "run_funnel_report",
+            "get_custom_dimensions_and_metrics",
+            "run_realtime_report"
+          ]
+        },
+        "property_id": {
+          "type": "string",
+          "pattern": "^properties/[0-9]+$"
+        }
+      }
+    },
+    "request": {
+      "type": "object",
+      "required": ["property_id"],
+      "additionalProperties": false,
+      "properties": {
+        "property_id": {
+          "type": "string",
+          "pattern": "^properties/[0-9]+$"
+        },
+        "date_range": {
+          "type": "object",
+          "required": ["start_date", "end_date"],
+          "additionalProperties": false,
+          "properties": {
+            "start_date": { "type": "string", "format": "date" },
+            "end_date": { "type": "string", "format": "date" }
+          }
+        },
+        "dimensions": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "metrics": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "filters": {
+          "type": "array",
+          "items": { "type": "object" }
+        }
+      }
+    },
+    "result": {
+      "type": "object",
+      "required": ["rows"],
+      "additionalProperties": false,
+      "properties": {
+        "rows": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "metadata": {
+          "type": "object"
+        },
+        "normalized_evidence": {
+          "type": "object"
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": [
+        "retrieved_at",
+        "source_verified",
+        "inference_used"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "retrieved_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "source_verified": {
+          "const": true
+        },
+        "inference_used": {
+          "const": false
+        },
+        "provider_version": {
+          "type": "string"
+        },
+        "provider_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "request_fingerprint": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}
