@@ -1,0 +1,34 @@
+id: BID-LEARN-001
+name: Frequent Smart Bidding Target Changes
+version: 1.0.0
+category: bidding
+description: Flag repeated target or conversion-goal changes during a learning period as a stability risk.
+when:
+  all:
+    - smart_bidding == true
+    - recent_target_or_goal_changes >= 2
+    - changes_occurred_within_learning_window == true
+exclude_when:
+  - emergency_measurement_fix == true
+severity:
+  level: medium
+confidence:
+  level: high
+evidence_required:
+  - change_history
+  - bidding_strategy
+  - learning_status
+finding:
+  title: Frequent bidding changes may prevent stable learning
+recommendation:
+  - stabilize_configuration
+  - fix_measurement_before_restarting_learning
+impact:
+  dimension: efficiency
+  level: medium
+action:
+  type: recommend
+human_approval_required: true
+related_skills:
+  - bidding-strategy
+  - conversion-tracking
