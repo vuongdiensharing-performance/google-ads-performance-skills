@@ -1,12 +1,11 @@
 provider_id: google_analytics
 provider_name: Google Analytics MCP
-integration_version: 0.1.0
+integration_version: 0.2.0
 mode: read_only
 transport: mcp
 
 upstream:
   repository: https://github.com/googleanalytics/google-analytics-mcp.git
-  ref: main
   pinned_commit: a8ca729d4a8fa99bffe87962c17c0539c6aa9da7
   package: analytics-mcp
   package_version: 0.7.0
@@ -22,6 +21,27 @@ allowed_tools:
   - get_custom_dimensions_and_metrics
   - run_realtime_report
 
+evidence_types:
+  GA4_IDENTITY:
+    tools:
+      - get_account_summaries
+      - get_property_details
+  GA4_LINKAGE:
+    tools:
+      - list_google_ads_links
+  GA4_REPORT:
+    tools:
+      - run_report
+  GA4_FUNNEL:
+    tools:
+      - run_funnel_report
+  GA4_METADATA:
+    tools:
+      - get_custom_dimensions_and_metrics
+  GA4_REALTIME:
+    tools:
+      - run_realtime_report
+
 trust_boundary:
   external_data_untrusted: true
   may_generate_rule_decision: false
@@ -30,11 +50,16 @@ trust_boundary:
   inference_used_must_be: false
 
 identity_requirements:
-  property_id_required: true
+  property_id_required_for_property_scoped_tools: true
   property_id_format: "properties/<numeric_id>"
 
 provenance_requirements:
   source_verified: true
   retrieved_at_required: true
+  provider_version_required: true
   provider_commit_required: true
-  request_fingerprint_recommended: true
+  request_fingerprint_required: true
+  request_fingerprint_algorithm: sha256
+  request_fingerprint_input:
+    - source.tool
+    - request
