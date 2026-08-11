@@ -1,6 +1,6 @@
 id: CV-LEAD-001
 name: Lead Quality Gap
-version: 1.0.0
+version: 1.0.1
 category: conversion
 description: Flag accounts where platform lead volume looks healthy but qualified-lead or downstream business quality is materially weak.
 when:
@@ -36,3 +36,6 @@ related_skills:
   - conversion-tracking
   - performance-diagnosis
   - audience-strategy
+knowledge_dependencies:
+  - knowledge/measurement/conversion-framework.md
+  - knowledge/analytics/performance-diagnosis.md
