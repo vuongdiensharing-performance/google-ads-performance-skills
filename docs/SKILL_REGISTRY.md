@@ -1,4 +1,4 @@
-# Skill Registry v2.0
+# Skill Registry v2.1
 
 The registry is the canonical machine-readable dependency graph for Core Skills. Each Skill declares exact repository-relative Knowledge and Rule paths, and the registry mirrors those declarations for tooling, validation, orchestration, and model grounding.
 
@@ -27,30 +27,39 @@ The registry is the canonical machine-readable dependency graph for Core Skills.
 
 ## Machine registry
 
-`skills/registry.yaml` is the source used by tooling and orchestration. Version 2.0 uses this shape:
+`skills/registry.yaml` is the Skill dependency graph. Version 2.1 additionally points to the Rule Knowledge provenance registry:
 
 ```yaml
-version: 2.0.0
+version: 2.1.0
 schema: skill-dependency-graph/v1
 dependency_policy:
   knowledge: exact_repository_paths
   rules: exact_repository_paths
+  rule_knowledge_provenance: exact_repository_paths
   no_inference: true
-skills:
-  - id: S01
-    name: account-audit
-    path: skills/account-audit/SKILL.md
-    knowledge:
-      - knowledge/structure/account-structure.md
-    rules:
-      - rules/structure/fragmentation-risk.yaml
-    conditional_rules:
-      - when: pmax_or_shopping_campaign_present
-        rules:
-          - rules/pmax/primary-goal-missing.yaml
+rule_provenance_registry: rules/registry.yaml
 ```
 
-The full dependency graph lives in `skills/registry.yaml`; this document deliberately does not duplicate all dependency paths.
+The full Skill dependency graph lives in `skills/registry.yaml`; Rule → Knowledge provenance lives in `rules/registry.yaml`.
+
+## Rule Knowledge provenance registry
+
+`rules/registry.yaml` uses schema `rule-knowledge-provenance/v1` and maps every active Rule ID to:
+
+- its exact Rule path;
+- its exact Knowledge dependency paths;
+- the same dependency declaration stored inside the Rule file.
+
+Example:
+
+```yaml
+- id: STR-FRAG-001
+  path: rules/structure/fragmentation-risk.yaml
+  knowledge:
+    - knowledge/structure/account-structure.md
+```
+
+This closes the provenance gap identified during Gate 2B: a resolved Rule now has an explicit machine-readable path to the Knowledge that informs it.
 
 ## Dependency contract
 
@@ -60,9 +69,12 @@ For every Core Skill:
 2. `knowledge` contains exact repository-relative Knowledge paths.
 3. `rules` contains exact repository-relative Rule paths.
 4. Conditional Rule dependencies contain exact paths plus a machine-readable activation condition.
-5. No consumer may infer Rule filenames from category names or directory names.
-6. The registry must match the corresponding Skill frontmatter exactly.
-7. Every dependency path must exist in the repository.
+5. Every referenced Rule must exist in `rules/registry.yaml`.
+6. Every Rule in the provenance registry must declare non-empty exact Knowledge dependencies.
+7. Rule file `knowledge_dependencies` must match the provenance registry exactly.
+8. No consumer may infer Rule filenames or Rule → Knowledge relationships from category names, filenames, directory names, related Skills, or semantic similarity.
+9. The registry must match the corresponding Skill frontmatter exactly.
+10. Every dependency path must exist in the repository.
 
 ## Runtime contract
 
@@ -70,7 +82,7 @@ Every Core Skill follows:
 
 `Validate → Load Knowledge → Normalize Context → Run Rules → Classify → Prioritize → Recommend → Measure`
 
-The exact stages may be shortened for generative/planning Skills, but evidence validation, dependency loading, and safety must remain explicit.
+The exact stages may be shortened for generative/planning Skills, but evidence validation, dependency loading, provenance, and safety must remain explicit.
 
 ## Dependency graph
 
@@ -92,6 +104,7 @@ The exact stages may be shortened for generative/planning Skills, but evidence v
 
 - Every Skill must have a matching directory and `SKILL.md`.
 - Every Core Skill must declare exact Knowledge and Rule dependencies.
+- Every active Rule must declare exact Knowledge provenance.
 - Rule Engine results must not be presented as causality without supporting evidence.
 - Severity and priority remain separate.
 - Source-repository claims are lineage, not authority.
