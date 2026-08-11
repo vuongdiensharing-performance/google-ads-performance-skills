@@ -1,97 +1,99 @@
 #!/usr/bin/env python3
-"""Validate the read-only Google Analytics Evidence Contract fixture."""
+"""Validate a GA4 Evidence Contract against the canonical JSON Schema and provider policy."""
 
 from __future__ import annotations
 
 import argparse
-import re
-from datetime import datetime
+import hashlib
+import json
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any
 
 import yaml
+from jsonschema import Draft202012Validator, FormatChecker
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPECTED_COMMIT = "a8ca729d4a8fa99bffe87962c17c0539c6aa9da7"
-ALLOWED_TOOLS = {
-    "get_account_summaries",
-    "get_property_details",
-    "list_google_ads_links",
-    "run_report",
-    "run_funnel_report",
-    "get_custom_dimensions_and_metrics",
-    "run_realtime_report",
-}
-PROPERTY_RE = re.compile(r"^properties/[0-9]+$")
-SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
+SCHEMA_PATH = ROOT / "schemas/ga4-evidence-contract.json"
+PROVIDER_PATH = ROOT / "providers/google_analytics.yaml"
 
 
-def load(path: Path) -> dict[str, Any]:
+def load_yaml(path: Path) -> dict[str, Any]:
     value = yaml.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(value, dict):
-        raise ValueError("contract root must be a mapping")
+        raise ValueError(f"{path} must contain a mapping")
     return value
 
 
-def require_mapping(parent: dict[str, Any], key: str, errors: list[str]) -> dict[str, Any]:
-    value = parent.get(key)
+def load_json(path: Path) -> dict[str, Any]:
+    value = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(value, dict):
-        errors.append(f"{key} must be a mapping")
-        return {}
+        raise ValueError(f"{path} must contain a JSON object")
     return value
 
 
-def validate(contract: dict[str, Any]) -> list[str]:
+def canonical_request_fingerprint(contract: dict[str, Any]) -> str:
+    payload = {
+        "tool": contract["source"]["tool"],
+        "request": contract["request"],
+    }
+    canonical = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    digest = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+    return f"sha256:{digest}"
+
+
+def validate_semantics(contract: dict[str, Any], provider: dict[str, Any]) -> list[str]:
     errors: list[str] = []
+    source = contract["source"]
+    request = contract["request"]
+    provenance = contract["provenance"]
+    tool = source["tool"]
+    evidence_type = contract["evidence_type"]
 
-    if contract.get("contract_version") != "1.0.0":
-        errors.append("contract_version must be 1.0.0")
-    if contract.get("evidence_type") != "GA4_REPORT":
-        errors.append("evidence_type must be GA4_REPORT")
+    mappings = provider.get("evidence_types", {})
+    allowed_tools = set(provider.get("allowed_tools", []))
+    if tool not in allowed_tools:
+        errors.append(f"source.tool is not allowed by provider policy: {tool}")
 
-    source = require_mapping(contract, "source", errors)
-    request = require_mapping(contract, "request", errors)
-    result = require_mapping(contract, "result", errors)
-    provenance = require_mapping(contract, "provenance", errors)
+    mapped_tools = set(mappings.get(evidence_type, {}).get("tools", []))
+    if tool not in mapped_tools:
+        errors.append(f"evidence_type {evidence_type} is not mapped to source.tool {tool} by provider policy")
 
-    if source.get("provider") != "google_analytics":
-        errors.append("source.provider must be google_analytics")
-    if source.get("transport") != "mcp":
-        errors.append("source.transport must be mcp")
-    if source.get("tool") not in ALLOWED_TOOLS:
-        errors.append("source.tool is not in the allowed read-only tool set")
-    if not PROPERTY_RE.fullmatch(str(source.get("property_id", ""))):
-        errors.append("source.property_id must match properties/<numeric_id>")
+    pinned_commit = provider.get("upstream", {}).get("pinned_commit")
+    if provenance["provider_commit"] != pinned_commit:
+        errors.append("provenance.provider_commit does not match provider pinned_commit")
 
-    if request.get("property_id") != source.get("property_id"):
-        errors.append("request.property_id must match source.property_id")
+    package_version = provider.get("upstream", {}).get("package_version")
+    if provenance["provider_version"] != package_version:
+        errors.append("provenance.provider_version does not match provider package_version")
 
-    date_range = require_mapping(request, "date_range", errors)
-    for key in ("start_date", "end_date"):
-        value = date_range.get(key)
-        try:
-            datetime.strptime(str(value), "%Y-%m-%d")
-        except (TypeError, ValueError):
-            errors.append(f"request.date_range.{key} must be YYYY-MM-DD")
+    if source.get("property_id") is not None and request.get("property_id") is not None:
+        if source["property_id"] != request["property_id"]:
+            errors.append("request.property_id must match source.property_id")
 
-    if not isinstance(result.get("rows"), list):
-        errors.append("result.rows must be a list")
+    if "date_range" in request:
+        start = date.fromisoformat(request["date_range"]["start_date"])
+        end = date.fromisoformat(request["date_range"]["end_date"])
+        if start > end:
+            errors.append("request.date_range.start_date must not be after end_date")
 
-    if provenance.get("source_verified") is not True:
-        errors.append("provenance.source_verified must be true")
-    if provenance.get("inference_used") is not False:
-        errors.append("provenance.inference_used must be false")
-    if provenance.get("provider_commit") != EXPECTED_COMMIT:
-        errors.append("provenance.provider_commit does not match pinned upstream baseline")
-    if not SHA256_RE.fullmatch(str(provenance.get("request_fingerprint", ""))):
-        errors.append("provenance.request_fingerprint must be sha256:<64 lowercase hex chars>")
+    expected_fingerprint = canonical_request_fingerprint(contract)
+    if provenance["request_fingerprint"] != expected_fingerprint:
+        errors.append("provenance.request_fingerprint does not match canonical source.tool + request SHA-256")
 
-    try:
-        datetime.fromisoformat(str(provenance.get("retrieved_at", "")).replace("Z", "+00:00"))
-    except ValueError:
-        errors.append("provenance.retrieved_at must be an ISO-8601 datetime")
+    if provider.get("provenance_requirements", {}).get("inference_used_must_be") is False:
+        if provenance["inference_used"] is not False:
+            errors.append("provenance.inference_used must be false")
 
     return errors
+
+
+def validate(contract: dict[str, Any], schema: dict[str, Any], provider: dict[str, Any]) -> list[str]:
+    validator = Draft202012Validator(schema, format_checker=FormatChecker())
+    errors = [error.message for error in sorted(validator.iter_errors(contract), key=lambda item: list(item.path))]
+    if errors:
+        return errors
+    return validate_semantics(contract, provider)
 
 
 def main() -> int:
@@ -104,12 +106,14 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
-        contract = load(args.fixture.resolve())
+        contract = load_yaml(args.fixture.resolve())
+        schema = load_json(SCHEMA_PATH)
+        provider = load_yaml(PROVIDER_PATH)
+        errors = validate(contract, schema, provider)
     except Exception as exc:
         print(f"FAIL GA4 evidence contract: {exc}")
         return 1
 
-    errors = validate(contract)
     if errors:
         print("FAIL GA4 evidence contract")
         for error in errors:
@@ -117,9 +121,12 @@ def main() -> int:
         return 1
 
     print(f"OK   {args.fixture.resolve().relative_to(ROOT)}")
-    print("     read-only provider contract validated")
-    print("     inference_used=false")
+    print("     canonical JSON Schema validated")
+    print(f"     evidence_type={contract['evidence_type']}")
+    print(f"     tool={contract['source']['tool']}")
     print("     source_verified=true")
+    print("     inference_used=false")
+    print("     request_fingerprint=canonical-sha256")
     return 0
 
 
