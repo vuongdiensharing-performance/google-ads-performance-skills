@@ -20,6 +20,7 @@ jobs:
       - run: python scripts/validate_rules.py --rules rules
       - run: python scripts/validate_skills.py --skills skills --registry skills/registry.yaml
       - run: python scripts/evaluate_fixtures.py --fixtures evals/fixtures
+      - run: python scripts/evaluate_gemini_account_audit.py --mode offline
 
   security:
     runs-on: ubuntu-latest
