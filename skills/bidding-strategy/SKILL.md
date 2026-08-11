@@ -1,9 +1,18 @@
 ---
 name: bidding-strategy
-version: 1.1.0
+version: 1.2.0
 description: Select, diagnose, and optimize Google Ads bidding based on objective, conversion maturity, economics, data quality, and constraints.
 category: optimization
 status: core
+knowledge_dependencies:
+  - knowledge/bidding/bidding-principles.md
+  - knowledge/measurement/conversion-framework.md
+  - knowledge/analytics/performance-diagnosis.md
+rule_dependencies:
+  - rules/bidding/objective-strategy-mismatch.yaml
+  - rules/bidding/frequent-target-changes.yaml
+  - rules/bidding/conversion-signal-risk.yaml
+  - rules/bidding/broad-without-smart-bidding.yaml
 ---
 # Bidding Strategy
 ## Purpose
