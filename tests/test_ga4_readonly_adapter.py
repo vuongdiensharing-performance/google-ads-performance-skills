@@ -55,10 +55,15 @@ class GA4ReadOnlyAdapterTests(unittest.TestCase):
             adapter.call("get_property_details", {"property_id": "properties/not-a-number"})
         self.assertEqual(client.calls, [])
 
+    def test_scoped_method_rejects_conflicting_property_id(self) -> None:
+        adapter, client = self.adapter()
+        with self.assertRaises(GA4AdapterError):
+            adapter.run_report("properties/123", {"property_id": "properties/999", "metrics": ["sessions"]})
+        self.assertEqual(client.calls, [])
+
     def test_fingerprint_matches_contract_semantics(self) -> None:
         adapter, _ = self.adapter()
         request = {
-            "property_id": "properties/123",
             "date_range": {"start_date": "2026-08-01", "end_date": "2026-08-10"},
             "dimensions": ["sessionCampaignName"],
             "metrics": ["sessions", "conversions"],
