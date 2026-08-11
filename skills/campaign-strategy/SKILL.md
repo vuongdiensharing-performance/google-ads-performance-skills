@@ -1,9 +1,17 @@
 ---
 name: campaign-strategy
-version: 1.1.0
+version: 1.2.0
 description: Translate business goals and demand intent into a Google Ads campaign strategy and measurement plan.
 category: strategy
 status: core
+knowledge_dependencies:
+  - knowledge/strategy/intent-framework.md
+  - knowledge/strategy/funnel-strategy.md
+  - knowledge/structure/account-structure.md
+  - knowledge/bidding/bidding-principles.md
+rule_dependencies:
+  - rules/structure/mixed-intent-campaign.yaml
+  - rules/structure/fragmentation-risk.yaml
 ---
 # Campaign Strategy
 ## Purpose
