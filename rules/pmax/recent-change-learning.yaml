@@ -1,6 +1,6 @@
 id: PMAX-LEARN-001
 name: PMax Recent Change During Learning
-version: 1.0.0
+version: 1.0.1
 category: pmax
 description: Flag major PMax optimization changes made before sufficient learning or conversion-lag evidence is available.
 when:
@@ -32,3 +32,6 @@ human_approval_required: true
 related_skills:
   - pmax-optimization
   - performance-diagnosis
+knowledge_dependencies:
+  - knowledge/pmax/pmax-principles.md
+  - knowledge/analytics/performance-diagnosis.md
