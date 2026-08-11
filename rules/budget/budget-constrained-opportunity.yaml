@@ -1,0 +1,40 @@
+id: BG-OPP-001
+name: Budget constrained high-value campaign opportunity
+version: 1.0.0
+category: budget
+description: Identify a campaign that may be budget constrained while showing acceptable business performance and credible incremental demand signals.
+when:
+  all:
+    - evidence.budget_constraint_detected == true
+    - evidence.performance_meets_target == true
+    - evidence.incremental_demand_signal_present == true
+exclude_when:
+  - evidence.conversion_quality_unknown == true
+  - evidence.tracking_status_unreliable == true
+evidence_required:
+  - budget_constraint_signal
+  - target_metric
+  - conversion_quality
+  - incremental_demand_signal
+severity:
+  level: medium
+confidence:
+  level: medium
+finding:
+  title: Campaign may have a credible scaling opportunity constrained by budget
+recommendation:
+  - estimate_marginal_return_before_increase
+  - compare_with_other_budget_destinations
+  - validate_conversion_quality
+impact:
+  dimensions:
+    - scale
+    - revenue
+  level: high
+action:
+  type: recommend
+human_approval_required: true
+related_skills:
+  - budget-optimization
+  - performance-diagnosis
+  - bidding-strategy
