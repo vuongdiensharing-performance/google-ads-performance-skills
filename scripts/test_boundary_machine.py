@@ -12,17 +12,8 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from rule_engine import evaluate_rule, load_rules  # noqa: E402
+from rule_engine import evaluate_rule  # noqa: E402
 from validate_boundary_contract import load_yaml, validate_rule  # noqa: E402
-
-EXPECTED_IDS = {
-    "A": "APPLICABLE_VALID",
-    "B": "APPLICABLE_TRIGGERED",
-    "C": "APPLICABLE_MISSING_EVIDENCE",
-    "D": "NOT_APPLICABLE",
-    "E": "CONFLICTING_EVIDENCE",
-    "F": "EXPLICIT_EXCLUSION",
-}
 
 
 def main() -> int:
@@ -32,29 +23,38 @@ def main() -> int:
     args = parser.parse_args()
 
     registry = load_yaml(ROOT / "rules/registry.yaml")
-    rules = {rule.get("id"): rule for rule in load_rules(ROOT / "rules")}
+    registry_by_id = {item.get("id"): item for item in registry.get("rules", [])}
     matrix = load_yaml(args.fixtures)
     cases = matrix.get("cases", [])
     if len(cases) != 36:
         print(f"FAIL expected 36 boundary fixtures, found {len(cases)}")
         return 1
 
-    target_ids = sorted({case["rule_id"] for case in cases})
-    for rule_id in target_ids:
-        rule = rules.get(rule_id)
-        if rule is None:
-            print(f"FAIL missing Rule {rule_id}")
-            return 1
+    rules = {}
+    for rule_id, entry in registry_by_id.items():
+        if rule_id in {case["rule_id"] for case in cases}:
+            path = ROOT / entry["path"]
+            rules[rule_id] = load_yaml(path)
+            rules[rule_id]["_source"] = str(path)
+
+    failures = 0
+    for rule_id, rule in rules.items():
         errors = validate_rule(Path(rule["_source"]), registry)
         if errors:
+            failures += 1
             print(f"FAIL contract {rule_id}")
             for error in errors:
                 print(f"  - {error}")
-            return 1
 
-    failures = 0
+    if failures:
+        return 1
+
     for case in cases:
-        rule = rules[case["rule_id"]]
+        rule_id = case["rule_id"]
+        if rule_id not in rules:
+            print(f"FAIL {case['case_id']}: Rule {rule_id} is not present in registry")
+            return 1
+        rule = rules[rule_id]
         expected = case["expected"]
         observed = []
         for _ in range(args.runs):
@@ -71,12 +71,8 @@ def main() -> int:
         expected_decision = expected["decision"]
         if first["boundary_state"] != expected_state or first["decision"] != expected_decision:
             failures += 1
-            print(
-                f"FAIL {case['case_id']}: expected {expected_state}/{expected_decision}, "
-                f"got {first['boundary_state']}/{first['decision']}"
-            )
+            print(f"FAIL {case['case_id']}: expected {expected_state}/{expected_decision}, got {first['boundary_state']}/{first['decision']}")
             continue
-
         if first["inference_used"] is not False:
             failures += 1
             print(f"FAIL {case['case_id']}: inference_used must be false")
@@ -89,13 +85,11 @@ def main() -> int:
             failures += 1
             print(f"FAIL {case['case_id']}: missing audit trail knowledge")
             continue
-
         expected_finding = expected_state == "APPLICABLE_TRIGGERED"
         if first["finding_generated"] is not expected_finding:
             failures += 1
             print(f"FAIL {case['case_id']}: finding_generated invariant violated")
             continue
-
         print(f"PASS {case['case_id']} {expected_state} {expected_decision}")
 
     print(f"\nBoundary matrix: {len(cases) - failures}/36 passed")

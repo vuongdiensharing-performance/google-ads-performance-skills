@@ -10,14 +10,6 @@ from typing import Any
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
-VALID_STATES = {
-    "APPLICABLE_VALID",
-    "APPLICABLE_TRIGGERED",
-    "APPLICABLE_MISSING_EVIDENCE",
-    "NOT_APPLICABLE",
-    "CONFLICTING_EVIDENCE",
-    "EXPLICIT_EXCLUSION",
-}
 STATE_KEYS = {"A", "B", "C", "D", "E", "F"}
 EXPECTED_STATE_IDS = {
     "A": "APPLICABLE_VALID",
@@ -48,14 +40,11 @@ def validate_rule(rule_path: Path, registry: dict[str, Any]) -> list[str]:
     contract = rule.get("boundary_contract")
     if not isinstance(contract, dict):
         return ["missing boundary_contract"]
-
     missing = sorted(REQUIRED_FIELDS - set(contract))
     if missing:
         errors.append(f"boundary_contract missing fields: {', '.join(missing)}")
-
     if not isinstance(contract.get("applicable_when"), list) or not contract.get("applicable_when"):
         errors.append("boundary_contract.applicable_when must be a non-empty list")
-
     evidence = contract.get("evidence_required")
     if not isinstance(evidence, list) or not evidence:
         errors.append("boundary_contract.evidence_required must be a non-empty list")
@@ -104,7 +93,6 @@ def validate_rule(rule_path: Path, registry: dict[str, Any]) -> list[str]:
             errors.append("registry path does not match Rule path")
         if entry.get("knowledge") != rule.get("knowledge_dependencies"):
             errors.append("registry knowledge does not exactly mirror knowledge_dependencies")
-
     return errors
 
 
@@ -116,12 +104,18 @@ def main() -> int:
     args = parser.parse_args()
 
     registry = load_yaml(args.registry.resolve())
-    failures = 0
-    candidates = sorted(args.rules.resolve().rglob("*.yaml"))
+    registry_by_id = {item.get("id"): item for item in registry.get("rules", [])}
     if args.rule_ids:
-        requested = set(args.rule_ids)
-        candidates = [p for p in candidates if load_yaml(p).get("id") in requested]
+        missing = [rule_id for rule_id in args.rule_ids if rule_id not in registry_by_id]
+        if missing:
+            print(f"FAIL registry missing requested Rule IDs: {', '.join(missing)}")
+            return 1
+        candidates = [ROOT / registry_by_id[rule_id]["path"] for rule_id in args.rule_ids]
+    else:
+        candidates = sorted(args.rules.resolve().rglob("*.yaml"))
+        candidates = [p for p in candidates if p.resolve() != args.registry.resolve()]
 
+    failures = 0
     for path in candidates:
         errors = validate_rule(path, registry)
         if errors:
@@ -131,7 +125,6 @@ def main() -> int:
                 print(f"  - {error}")
         else:
             print(f"OK   {path}")
-
     return 1 if failures else 0
 
 
