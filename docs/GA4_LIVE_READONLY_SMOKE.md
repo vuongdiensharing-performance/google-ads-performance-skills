@@ -20,7 +20,9 @@ Evidence Contract validation
 
 ## Prerequisites
 
-The upstream Google Analytics MCP server is experimental and requires local Google credentials. The official setup uses Application Default Credentials with the Analytics read-only scope and recommends setting `GOOGLE_PROJECT_ID`. urlGoogle Analytics MCP setup instructionshttps://github.com/googleanalytics/google-analytics-mcp/blob/main/README.md
+The upstream Google Analytics MCP server is experimental and requires local Google credentials. The official setup uses Application Default Credentials with the Analytics read-only scope and recommends setting `GOOGLE_PROJECT_ID`.
+
+See the official Google Analytics MCP README: https://github.com/googleanalytics/google-analytics-mcp/blob/main/README.md
 
 Required local environment:
 
@@ -65,4 +67,6 @@ A failed live call is not a Rule failure. It is an integration/evidence acquisit
 
 ## Known upstream runtime caveat
 
-The upstream project has had historical reports of MCP tool-call timeouts in some clients. A live failure should therefore be classified as transport/auth/provider failure rather than interpreted as GA4 evidence. citeturn0search3
+The upstream project has had historical reports of MCP tool-call timeouts in some clients. A live failure should therefore be classified as transport/auth/provider failure rather than interpreted as GA4 evidence.
+
+See the upstream timeout report: https://github.com/googleanalytics/google-analytics-mcp/issues/150
