@@ -1,0 +1,35 @@
+id: BID-SIGNAL-001
+name: Bidding Conversion Signal Risk
+version: 1.0.0
+category: bidding
+description: Flag Smart Bidding when the primary conversion signal is known to be unreliable or materially disconnected from the business outcome.
+when:
+  all:
+    - smart_bidding == true
+    - conversion_signal.quality == unreliable
+exclude_when:
+  - signal_issue_already_remediated == true
+severity:
+  level: critical
+confidence:
+  level: high
+evidence_required:
+  - primary_conversion_action
+  - tracking_validation
+  - business_outcome_comparison
+finding:
+  title: Smart Bidding is optimizing against an unreliable conversion signal
+recommendation:
+  - stop_treating_platform_efficiency_as_business_efficiency
+  - audit_conversion_goal
+  - validate_crm_or_revenue_outcome
+impact:
+  dimension: measurement_risk
+  level: critical
+action:
+  type: investigate
+human_approval_required: true
+related_skills:
+  - conversion-tracking
+  - bidding-strategy
+  - performance-diagnosis
