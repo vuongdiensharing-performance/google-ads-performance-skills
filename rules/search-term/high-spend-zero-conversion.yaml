@@ -1,0 +1,39 @@
+id: ST-SPEND-001
+name: High Spend Without Conversion
+version: 1.0.0
+category: search_term
+description: Flag a search term that has consumed meaningful spend without a recorded target conversion.
+when:
+  all:
+    - spend > 0
+    - conversions == 0
+    - evidence.spend_is_material == true
+exclude_when:
+  - conversion_lag_not_mature == true
+  - tracking_integrity_unknown == true
+severity:
+  level: medium
+confidence:
+  level: medium
+evidence_required:
+  - spend
+  - conversions
+  - target_conversion_definition
+  - conversion_lag
+finding:
+  title: Material spend has produced no recorded target conversion
+recommendation:
+  - inspect_search_intent
+  - inspect_landing_page
+  - inspect_conversion_tracking
+  - consider_negative_or_bid_action_only_after_context_review
+impact:
+  dimension: wasted_spend
+  level: medium
+action:
+  type: investigate
+human_approval_required: true
+related_skills:
+  - search-term-analysis
+  - performance-diagnosis
+  - conversion-tracking
