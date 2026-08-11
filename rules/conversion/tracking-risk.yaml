@@ -1,0 +1,42 @@
+id: CV-TRACK-001
+name: Conversion tracking risk
+version: 1.0.0
+category: conversion
+description: Flag accounts or campaigns when conversion tracking evidence indicates missing, duplicated, stale, or otherwise unreliable primary conversion signals.
+when:
+  all:
+    - evidence.primary_conversion_expected == true
+    - evidence.tracking_status in:
+        - missing
+        - broken
+        - duplicated
+        - stale
+exclude_when:
+  - evidence.data_freshness_unknown == true
+evidence_required:
+  - primary_conversion_definition
+  - tracking_status
+  - data_freshness
+severity:
+  level: critical
+confidence:
+  level: high
+finding:
+  title: Primary conversion signal may be unreliable
+recommendation:
+  - audit_conversion_action
+  - verify_tagging_and_deduplication
+  - verify_primary_secondary_configuration
+impact:
+  dimensions:
+    - measurement_risk
+    - conversion
+    - efficiency
+  level: high
+action:
+  type: investigate
+human_approval_required: false
+related_skills:
+  - conversion-tracking
+  - bidding-strategy
+  - performance-diagnosis
