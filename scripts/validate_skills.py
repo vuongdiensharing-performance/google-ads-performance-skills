@@ -66,14 +66,19 @@ def main() -> int:
     if registry.get("rule_provenance_registry") != "rules/registry.yaml":
         errors.append("registry: rule_provenance_registry must point to rules/registry.yaml")
 
-    if rule_registry.get("version") != "1.0.0":
-        errors.append("rule registry: expected version 1.0.0")
+    if rule_registry.get("version") != "1.0.1":
+        errors.append("rule registry: expected version 1.0.1")
     if rule_registry.get("schema") != "rule-knowledge-provenance/v1":
         errors.append("rule registry: expected schema rule-knowledge-provenance/v1")
     if rule_registry.get("dependency_policy", {}).get("no_inference") is not True:
         errors.append("rule registry: dependency_policy.no_inference must be true")
+    if rule_registry.get("dependency_policy", {}).get("source_of_truth") != "each_rule":
+        errors.append("rule registry: source_of_truth must be each_rule")
+    if rule_registry.get("dependency_policy", {}).get("registry_role") != "machine_readable_index_and_cross_check":
+        errors.append("rule registry: registry_role must be machine_readable_index_and_cross_check")
 
     rule_map: dict[str, dict] = {}
+    rule_ids: dict[str, str] = {}
     for entry in rule_entries:
         path = str(entry.get("path", ""))
         rule_id = str(entry.get("id", ""))
@@ -82,7 +87,10 @@ def main() -> int:
             continue
         if path in rule_map:
             errors.append(f"rule registry: duplicate path {path}")
+        if rule_id in rule_ids:
+            errors.append(f"rule registry: duplicate id {rule_id}")
         rule_map[path] = entry
+        rule_ids[rule_id] = path
 
         rule_path = Path(path)
         if not rule_path.exists():
@@ -96,15 +104,19 @@ def main() -> int:
 
         if rule.get("id") != rule_id:
             errors.append(f"{path}: rule id != rule registry id")
+
+        # Rule-local declaration is the source of truth.
         rule_knowledge = normalize_paths(rule.get("knowledge_dependencies"))
-        registry_knowledge = normalize_paths(entry.get("knowledge"))
-        if rule_knowledge != registry_knowledge:
-            errors.append(f"{path}: knowledge_dependencies != rule registry")
         if not rule_knowledge:
             errors.append(f"{path}: missing knowledge_dependencies")
         for dep in rule_knowledge:
             if not Path(dep).exists():
                 errors.append(f"{path}: missing Knowledge dependency {dep}")
+
+        # Registry is a machine-readable index/cross-check and must mirror the Rule exactly.
+        registry_knowledge = normalize_paths(entry.get("knowledge"))
+        if rule_knowledge != registry_knowledge:
+            errors.append(f"{path}: knowledge_dependencies != rule registry")
 
     for entry in entries:
         name = entry["name"]
@@ -168,7 +180,7 @@ def main() -> int:
         return 1
     print(
         f"SKILL VALIDATION PASSED: {len(entries)} Core Skills; "
-        f"{len(rule_entries)} Rules; Rule -> Knowledge provenance consistent"
+        f"{len(rule_entries)} Rules; Rule-local -> Knowledge provenance consistent"
     )
     return 0
 
