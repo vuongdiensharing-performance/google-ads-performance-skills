@@ -1,0 +1,38 @@
+id: STR-INTENT-001
+name: Materially mixed intent inside one campaign structure
+version: 1.0.0
+category: structure
+description: Flag a campaign or ad group when materially different intent classes are mixed and the resulting budget, messaging, or measurement cannot be interpreted cleanly.
+when:
+  all:
+    - evidence.multiple_intent_classes_present == true
+    - evidence.intent_classes_materially_different == true
+    - evidence.performance_or_budget_interpretation_impacted == true
+exclude_when:
+  - evidence.volume_too_low_for_separation == true
+evidence_required:
+  - intent_classification
+  - campaign_or_ad_group_structure
+  - budget_or_performance_impact
+severity:
+  level: medium
+confidence:
+  level: medium
+finding:
+  title: Materially different intent classes are mixed in the same structure
+recommendation:
+  - assess_campaign_or_ad_group_separation
+  - preserve_learning_signal_if_volume_is_low
+impact:
+  dimensions:
+    - efficiency
+    - measurement_risk
+    - scale
+  level: medium
+action:
+  type: recommend
+human_approval_required: true
+related_skills:
+  - campaign-structure
+  - campaign-strategy
+  - performance-diagnosis
