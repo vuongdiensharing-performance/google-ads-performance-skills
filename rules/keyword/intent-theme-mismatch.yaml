@@ -1,6 +1,6 @@
 id: KW-INTENT-001
 name: Keyword Intent Theme Mismatch
-version: 1.0.0
+version: 1.0.1
 category: keyword
 description: Flag keywords whose declared intent theme does not align with the campaign or ad-group offer.
 when:
@@ -33,3 +33,7 @@ related_skills:
   - campaign-structure
   - ad-copy
   - landing-page-audit
+knowledge_dependencies:
+  - knowledge/keyword/keyword-intent.md
+  - knowledge/strategy/intent-framework.md
+  - knowledge/ads/rsa-message-match.md
