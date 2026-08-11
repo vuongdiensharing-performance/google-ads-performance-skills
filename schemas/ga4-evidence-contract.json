@@ -2,129 +2,41 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "ga4-evidence-contract/v1",
   "title": "Google Analytics Evidence Contract",
-  "description": "Provider-neutral evidence envelope for read-only Google Analytics MCP results. This contract does not define Rule semantics or Boundary State decisions.",
+  "description": "Canonical provider-neutral envelope for read-only Google Analytics MCP evidence. It does not define Rule semantics or Boundary State decisions.",
   "type": "object",
-  "required": [
-    "contract_version",
-    "evidence_type",
-    "source",
-    "request",
-    "result",
-    "provenance"
-  ],
+  "required": ["contract_version", "evidence_type", "source", "request", "result", "provenance"],
+  "additionalProperties": false,
   "properties": {
-    "contract_version": {
-      "const": "1.0.0"
-    },
-    "evidence_type": {
-      "const": "GA4_REPORT"
-    },
+    "contract_version": { "const": "1.1.0" },
+    "evidence_type": { "type": "string", "enum": ["GA4_IDENTITY", "GA4_LINKAGE", "GA4_REPORT", "GA4_FUNNEL", "GA4_METADATA", "GA4_REALTIME"] },
     "source": {
-      "type": "object",
-      "required": ["provider", "transport", "tool", "property_id"],
-      "additionalProperties": false,
+      "type": "object", "required": ["provider", "transport", "tool"], "additionalProperties": false,
       "properties": {
-        "provider": { "const": "google_analytics" },
-        "transport": { "const": "mcp" },
-        "tool": {
-          "type": "string",
-          "enum": [
-            "get_account_summaries",
-            "get_property_details",
-            "list_google_ads_links",
-            "run_report",
-            "run_funnel_report",
-            "get_custom_dimensions_and_metrics",
-            "run_realtime_report"
-          ]
-        },
-        "property_id": {
-          "type": "string",
-          "pattern": "^properties/[0-9]+$"
-        }
+        "provider": { "const": "google_analytics" }, "transport": { "const": "mcp" },
+        "tool": { "type": "string", "enum": ["get_account_summaries", "get_property_details", "list_google_ads_links", "run_report", "run_funnel_report", "get_custom_dimensions_and_metrics", "run_realtime_report"] },
+        "property_id": { "type": "string", "pattern": "^properties/[0-9]+$" }
       }
     },
     "request": {
-      "type": "object",
-      "required": ["property_id"],
-      "additionalProperties": false,
+      "type": "object", "additionalProperties": true,
       "properties": {
-        "property_id": {
-          "type": "string",
-          "pattern": "^properties/[0-9]+$"
-        },
-        "date_range": {
-          "type": "object",
-          "required": ["start_date", "end_date"],
-          "additionalProperties": false,
-          "properties": {
-            "start_date": { "type": "string", "format": "date" },
-            "end_date": { "type": "string", "format": "date" }
-          }
-        },
-        "dimensions": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "metrics": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "filters": {
-          "type": "array",
-          "items": { "type": "object" }
-        }
+        "property_id": { "type": "string", "pattern": "^properties/[0-9]+$" },
+        "date_range": { "type": "object", "required": ["start_date", "end_date"], "additionalProperties": false, "properties": { "start_date": { "type": "string", "format": "date" }, "end_date": { "type": "string", "format": "date" } } },
+        "dimensions": { "type": "array", "items": { "type": "string" } }, "metrics": { "type": "array", "items": { "type": "string" } }, "filters": { "type": "array", "items": { "type": "object" } }
       }
     },
-    "result": {
-      "type": "object",
-      "required": ["rows"],
-      "additionalProperties": false,
-      "properties": {
-        "rows": {
-          "type": "array",
-          "items": { "type": "object" }
-        },
-        "metadata": {
-          "type": "object"
-        },
-        "normalized_evidence": {
-          "type": "object"
-        }
-      }
-    },
+    "result": { "type": "object", "required": ["data"], "additionalProperties": false, "properties": { "data": { "type": "object" }, "metadata": { "type": "object" }, "normalized_evidence": { "type": "object" } } },
     "provenance": {
-      "type": "object",
-      "required": [
-        "retrieved_at",
-        "source_verified",
-        "inference_used"
-      ],
-      "additionalProperties": false,
-      "properties": {
-        "retrieved_at": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "source_verified": {
-          "const": true
-        },
-        "inference_used": {
-          "const": false
-        },
-        "provider_version": {
-          "type": "string"
-        },
-        "provider_commit": {
-          "type": "string",
-          "pattern": "^[0-9a-f]{40}$"
-        },
-        "request_fingerprint": {
-          "type": "string",
-          "pattern": "^sha256:[0-9a-f]{64}$"
-        }
-      }
+      "type": "object", "required": ["retrieved_at", "source_verified", "inference_used", "provider_version", "provider_commit", "request_fingerprint"], "additionalProperties": false,
+      "properties": { "retrieved_at": { "type": "string", "format": "date-time" }, "source_verified": { "const": true }, "inference_used": { "const": false }, "provider_version": { "type": "string", "minLength": 1 }, "provider_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" }, "request_fingerprint": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" } }
     }
   },
-  "additionalProperties": false
+  "allOf": [
+    { "if": { "properties": { "evidence_type": { "const": "GA4_IDENTITY" } } }, "then": { "properties": { "source": { "properties": { "tool": { "enum": ["get_account_summaries", "get_property_details"] } } } } } },
+    { "if": { "properties": { "evidence_type": { "const": "GA4_LINKAGE" } } }, "then": { "properties": { "source": { "properties": { "tool": { "const": "list_google_ads_links" } }, "required": ["property_id"] } } } },
+    { "if": { "properties": { "evidence_type": { "const": "GA4_REPORT" } } }, "then": { "properties": { "source": { "properties": { "tool": { "const": "run_report" } }, "required": ["property_id"] } } } },
+    { "if": { "properties": { "evidence_type": { "const": "GA4_FUNNEL" } } }, "then": { "properties": { "source": { "properties": { "tool": { "const": "run_funnel_report" } }, "required": ["property_id"] } } } },
+    { "if": { "properties": { "evidence_type": { "const": "GA4_METADATA" } } }, "then": { "properties": { "source": { "properties": { "tool": { "const": "get_custom_dimensions_and_metrics" } }, "required": ["property_id"] } } } },
+    { "if": { "properties": { "evidence_type": { "const": "GA4_REALTIME" } } }, "then": { "properties": { "source": { "properties": { "tool": { "const": "run_realtime_report" } }, "required": ["property_id"] } } } }
+  ]
 }
