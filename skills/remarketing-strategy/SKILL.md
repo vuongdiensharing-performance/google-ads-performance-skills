@@ -1,28 +1,54 @@
 ---
 name: remarketing-strategy
-version: 1.0.0
+version: 1.1.0
 description: Design and evaluate Google Ads remarketing using lifecycle intent, first-party audiences, exclusions, and incremental-value considerations.
 category: targeting
 status: core
 ---
 # Remarketing Strategy
 ## Purpose
-Reconnect with relevant users by lifecycle stage without assuming attributed remarketing conversions are incremental.
+Reconnect relevant users by lifecycle stage while separating attribution from incremental value.
 ## Use When
 - Designing remarketing audiences.
-- Reviewing audience windows, exclusions, overlap, or lifecycle segmentation.
+- Reviewing windows, exclusions, overlap, lifecycle segmentation, or attributed performance.
+## Do Not Use When
+- Lifecycle events or audience evidence are unavailable.
 ## Required Inputs
-Audience definitions, lifecycle events, campaign type, conversion goals, and performance data.
+Audience definitions, lifecycle events, campaign type, conversion goals, performance data.
+## Optional Inputs
+CRM stages, customer lists, exclusion logic, experiment results.
+## Preconditions
+Define lifecycle stages, eligibility, windows, exclusions, and business outcome.
+## Knowledge Dependencies
+- `knowledge/strategy/intent-framework.md`
+- `knowledge/measurement/conversion-framework.md`
+## Rule Dependencies
+- `rules/conversion/lead-quality-gap.yaml`
 ## Workflow
 1. Define lifecycle segments.
 2. Set windows and exclusions.
 3. Map message to lifecycle stage.
-4. Review overlap and attribution.
-5. Assess incremental evidence.
-6. Recommend controlled tests.
+4. Run audience/quality Rules.
+5. Review overlap and attribution.
+6. Assess incremental evidence.
+7. Recommend controlled tests and measurement.
+## Rule Engine Contract
+Evaluate `remarketing_context`; a Rule match flags a review item and never proves incrementality.
+## Decision Logic
+Attributed remarketing conversions alone do not establish incremental conversions. Favor lifecycle relevance and controlled exclusions/tests.
 ## Output Contract
-Audience map, exclusions, messaging approach, risks, evidence, and test plan.
+- Audience/lifecycle map
+- Exclusions
+- Rule findings
+- Messaging approach
+- Evidence/limitations
+- Incrementality risks
+- Test plan
+## Confidence
+High for audience configuration; Medium/Low for incremental claims.
 ## Safety
-Do not claim incremental conversions from attributed remarketing conversions alone.
+Audience and exclusion changes require human approval.
 ## Related Skills
-audience-strategy, conversion-tracking, campaign-strategy
+`audience-strategy`, `conversion-tracking`, `campaign-strategy`, `performance-diagnosis`
+## Examples
+Explicitly distinguish platform attribution from experiment-based incrementality.
