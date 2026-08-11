@@ -1,6 +1,6 @@
 ---
 name: ad-copy
-version: 1.1.0
+version: 1.1.1
 description: Create and improve Google Search ad copy using intent, message match, differentiation, constraints, and testable variants.
 category: creative
 status: core
@@ -47,7 +47,7 @@ Message relevance and truthful differentiation precede keyword insertion or cosm
 ## Confidence
 High when offer, proof, and page content are supplied; lower when inputs are incomplete.
 ## Safety
-Do not invent product claims, prices, guarantees, certifications, or outcomes.
+Do not invent product claims, prices, guarantees, certifications, or outcomes. Drafting is non-mutating; any publish, replace, pause, or budget-affecting action requires explicit human approval.
 ## Related Skills
 `keyword-research`, `landing-page-audit`, `quality-score`, `campaign-strategy`
 ## Examples
