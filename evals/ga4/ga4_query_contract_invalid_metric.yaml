@@ -1,0 +1,7 @@
+query_id: GA4-CV-001
+property_id: properties/123456789
+date_range:
+  start_date: "2026-08-01"
+  end_date: "2026-08-10"
+metrics:
+  - purchaseRevenue
