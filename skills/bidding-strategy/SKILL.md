@@ -1,6 +1,6 @@
 ---
 name: bidding-strategy
-version: 1.2.0
+version: 1.2.1
 description: Select, diagnose, and optimize Google Ads bidding based on objective, conversion maturity, economics, data quality, and constraints.
 category: optimization
 status: core
@@ -12,7 +12,7 @@ rule_dependencies:
   - rules/bidding/objective-strategy-mismatch.yaml
   - rules/bidding/frequent-target-changes.yaml
   - rules/bidding/conversion-signal-risk.yaml
-  - rules/bidding/broad-without-smart-bidding.yaml
+  - rules/keyword/broad-without-smart-bidding.yaml
 ---
 # Bidding Strategy
 ## Purpose
@@ -37,7 +37,7 @@ Validate primary conversion, data quality, lookback, lag, and business target.
 - `rules/bidding/objective-strategy-mismatch.yaml`
 - `rules/bidding/frequent-target-changes.yaml`
 - `rules/bidding/conversion-signal-risk.yaml`
-- `rules/bidding/broad-without-smart-bidding.yaml`
+- `rules/keyword/broad-without-smart-bidding.yaml`
 ## Workflow
 1. Validate conversion signal.
 2. Define optimization objective and economics.
