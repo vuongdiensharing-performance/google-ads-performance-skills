@@ -1,41 +1,56 @@
 ---
 name: budget-optimization
-version: 1.0.0
+version: 1.1.0
 description: Reallocate Google Ads budget using performance evidence, marginal opportunity, business constraints, and portfolio logic.
 category: optimization
 status: core
 ---
-
 # Budget Optimization
-
 ## Purpose
 Identify where budget can be protected, reduced, increased, or tested without optimizing on a single metric.
-
 ## Use When
 - Budget allocation is under review.
-- Some campaigns are constrained while others have weaker marginal returns.
-- Scaling decisions need evidence.
-
+- Campaigns are constrained while others show weaker evidence of marginal return.
+- Scaling decisions need portfolio context.
+## Do Not Use When
+- Conversion quality or attribution is materially unreliable.
 ## Required Inputs
-Campaign spend, conversions/value, targets, budget limits, impression-share signals where available, and conversion lag context.
-
+Campaign spend, conversions/value, targets, budget limits, impression-share signals where available, lag context.
+## Optional Inputs
+Margins, seasonality, capacity constraints, experiment history, CRM quality.
+## Preconditions
+Normalize campaigns by objective/intent and validate comparable windows.
+## Knowledge Dependencies
+- `knowledge/bidding/bidding-principles.md`
+- `knowledge/analytics/performance-diagnosis.md`
+## Rule Dependencies
+- `rules/budget/budget-constraint-opportunity.yaml`
+- `rules/budget/scale-with-quality-risk.yaml`
 ## Workflow
-1. Validate data windows and attribution.
-2. Segment campaigns by objective/intent.
-3. Assess efficiency and volume.
-4. Look for marginal scale opportunity and constraint signals.
-5. Model scenarios rather than asserting guaranteed outcomes.
-6. Recommend reallocations with guardrails.
-
+1. Validate data and attribution.
+2. Segment by objective/intent.
+3. Assess efficiency, volume, constraints, and quality.
+4. Run budget Rules.
+5. Model scenarios and assumptions.
+6. Recommend reallocation/test with guardrails.
+7. Define measurement and rollback conditions.
+## Rule Engine Contract
+Evaluate normalized `budget_context`; matched Rules identify opportunities/risks, while exact incremental returns remain scenarios unless validated.
+## Decision Logic
+A constrained high-performing campaign is not automatically the best destination for more budget. Check marginal opportunity, conversion quality, capacity, and business economics.
 ## Output Contract
 - Portfolio view
-- Campaign opportunity/risk table
+- Rule findings
+- Opportunity/risk table
 - Proposed budget changes
 - Scenario assumptions
+- Guardrails
 - Measurement plan
-
+## Confidence
+High for observed constraints/performance; Medium/Low for incremental forecasts.
 ## Safety
-Never claim an exact incremental return without a validated model or experiment.
-
+Budget changes require human approval. Never present a scenario as guaranteed incremental return.
 ## Related Skills
-bidding-strategy, campaign-strategy, performance-diagnosis, account-audit
+`bidding-strategy`, `campaign-strategy`, `performance-diagnosis`, `account-audit`
+## Examples
+Label modeled outcomes separately from historical observations.
