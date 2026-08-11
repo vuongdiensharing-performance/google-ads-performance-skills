@@ -1,42 +1,86 @@
 benchmark: account-audit-v1
 skill: account-audit
-purpose: End-to-end benchmark for the reference Skill.
+purpose: End-to-end deterministic benchmark for the reference Skill against the Rule Engine.
+engine_scope:
+  rules: related_to_skill
+  skill_registry: skills/registry.yaml
 
 cases:
   - id: healthy-lead-gen-account
     class: PASS
     context:
       business_goal: qualified_leads
-      campaign_count: 4
-      fragmented_campaigns: false
-      conversion_tracking: valid
-      primary_conversion: qualified_lead
-      bidding_strategy: target_cpa
-      search_term_quality: high
-      budget_constraint: false
+      business_objective: qualified_leads
+      business_objective_defined: true
+      primary_conversion_goal: qualified_lead
+      bidding_strategy:
+        name: target_cpa
+        objective_alignment: aligned
+      tracking_validation:
+        status: passed
+      conversion_action_configuration:
+        valid: true
+      test_event_or_debug_evidence: passed
+      conversion_action:
+        is_micro_conversion: false
+        primary: true
+      primary_status: true
+      stronger_business_outcome_available: false
+      stronger_conversion_action: qualified_lead
+      campaigns_have_materially_similar_intent: false
+      fragmentation_reason: none
+      separation_reason: documented
+      budget_or_bidding_control_requires_separation: false
+      geography_or_business_unit_requires_separation: false
+      evidence:
+        data_density_is_low: false
+      campaign_structure: documented
+      intent_mapping: documented
+      volume_or_conversion_density: sufficient
     expected:
       status: pass
-      priority: P3
-      confidence: high
+      required_findings: []
+      excluded_findings: []
       approval_required: false
 
   - id: broken-measurement-and-fragmentation
     class: FAIL
     context:
       business_goal: qualified_leads
-      campaign_count: 31
-      fragmented_campaigns: true
-      conversion_tracking: broken
-      primary_conversion: micro_conversion
-      bidding_strategy: maximize_clicks
-      search_term_quality: low
-      budget_constraint: true
+      business_objective: qualified_leads
+      business_objective_defined: true
+      primary_conversion_goal: qualified_lead
+      bidding_strategy:
+        name: maximize_clicks
+        objective_alignment: mismatch
+      tracking_validation:
+        status: failed
+      conversion_action_configuration:
+        valid: false
+      test_event_or_debug_evidence: failed
+      conversion_action:
+        is_micro_conversion: true
+        primary: true
+      primary_status: true
+      stronger_business_outcome_available: true
+      stronger_conversion_action: qualified_lead
+      campaigns_have_materially_similar_intent: true
+      fragmentation_reason: none
+      separation_reason: none
+      budget_or_bidding_control_requires_separation: false
+      geography_or_business_unit_requires_separation: false
+      evidence:
+        data_density_is_low: true
+      campaign_structure: fragmented
+      intent_mapping: documented
+      volume_or_conversion_density: low
     expected:
       status: fail
       required_findings:
-        - tracking-integrity-risk
-        - fragmentation-risk
-        - primary-micro-conversion
+        - CV-TRACK-001
+        - STR-FRAG-001
+        - CV-PRIMARY-001
+        - BID-OBJ-001
       priority: P0
       approval_required: true
 
@@ -44,31 +88,56 @@ cases:
     class: INSUFFICIENT_EVIDENCE
     context:
       campaign_count: 10
-      conversion_tracking: unknown
-      primary_conversion: unknown
-      bidding_strategy: unknown
-      search_term_quality: unknown
     expected:
       status: insufficient_evidence
       confidence: low
       required_data:
-        - conversion_tracking
-        - primary_conversion
-        - bidding_strategy
-        - search_term_quality
+        - tracking_validation
+        - conversion_action_configuration
+        - test_event_or_debug_evidence
+        - conversion_action
+        - primary_status
+        - business_goal
+        - stronger_conversion_action
+        - campaign_structure
+        - intent_mapping
+        - volume_or_conversion_density
+        - separation_reason
 
   - id: justified-fragmentation
     class: FALSE_POSITIVE
     context:
       business_goal: qualified_leads
-      campaign_count: 18
-      fragmented_campaigns: true
+      business_objective: qualified_leads
+      business_objective_defined: true
+      primary_conversion_goal: qualified_lead
+      bidding_strategy:
+        name: target_cpa
+        objective_alignment: aligned
+      tracking_validation:
+        status: passed
+      conversion_action_configuration:
+        valid: true
+      test_event_or_debug_evidence: passed
+      conversion_action:
+        is_micro_conversion: false
+        primary: true
+      primary_status: true
+      stronger_business_outcome_available: false
+      stronger_conversion_action: qualified_lead
+      campaigns_have_materially_similar_intent: true
       fragmentation_reason: product_and_geo_controls
-      conversion_tracking: valid
-      primary_conversion: qualified_lead
-      bidding_strategy: target_cpa
+      separation_reason: geography
+      budget_or_bidding_control_requires_separation: false
+      geography_or_business_unit_requires_separation: true
+      evidence:
+        data_density_is_low: true
+      campaign_structure: fragmented
+      intent_mapping: documented
+      volume_or_conversion_density: sufficient
     expected:
       status: no_finding
+      required_findings: []
       excluded_findings:
-        - fragmentation-risk
+        - STR-FRAG-001
       approval_required: false
