@@ -1,0 +1,33 @@
+id: BID-OBJ-001
+name: Bidding Objective Mismatch
+version: 1.0.0
+category: bidding
+description: Flag a bidding strategy that does not align with the declared business optimization objective.
+when:
+  all:
+    - business_objective_defined == true
+    - bidding_strategy.objective_alignment == mismatch
+exclude_when:
+  - objective_definition_is_ambiguous == true
+severity:
+  level: high
+confidence:
+  level: high
+evidence_required:
+  - business_objective
+  - bidding_strategy
+  - primary_conversion_goal
+finding:
+  title: Bidding setup is misaligned with the stated business objective
+recommendation:
+  - review_primary_conversion_goal
+  - select_strategy_compatible_with_objective
+impact:
+  dimension: efficiency
+  level: high
+action:
+  type: investigate
+human_approval_required: true
+related_skills:
+  - bidding-strategy
+  - conversion-tracking
