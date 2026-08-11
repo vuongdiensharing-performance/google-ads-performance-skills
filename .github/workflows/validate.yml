@@ -29,6 +29,8 @@ jobs:
           --rule-ids STR-FRAG-001 CV-TRACK-001 BID-OBJ-001 BUD-OPP-001 ST-SPEND-001 PMAX-GOAL-001
       - name: Run Gate 2C boundary matrix
         run: python scripts/test_boundary_machine.py --fixtures evals/account-audit/boundary_matrix.yaml --runs 5
+      - name: Validate GA4 evidence contract
+        run: python scripts/validate_ga4_evidence_contract.py --fixture evals/ga4/ga4_evidence_contract.yaml
 
   security:
     runs-on: ubuntu-latest
