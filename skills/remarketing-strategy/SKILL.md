@@ -1,9 +1,14 @@
 ---
 name: remarketing-strategy
-version: 1.1.0
+version: 1.2.0
 description: Design and evaluate Google Ads remarketing using lifecycle intent, first-party audiences, exclusions, and incremental-value considerations.
 category: targeting
 status: core
+knowledge_dependencies:
+  - knowledge/strategy/intent-framework.md
+  - knowledge/measurement/conversion-framework.md
+rule_dependencies:
+  - rules/conversion/lead-quality-gap.yaml
 ---
 # Remarketing Strategy
 ## Purpose
