@@ -1,0 +1,18 @@
+name: Validate Skills
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r scripts/requirements.txt
+      - run: python scripts/validate_rules.py --rules rules
+      - run: python scripts/validate_skills.py --skills skills --registry skills/registry.yaml
+      - run: python scripts/evaluate_fixtures.py --fixtures evals/fixtures
