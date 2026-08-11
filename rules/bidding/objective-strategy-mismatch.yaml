@@ -1,6 +1,6 @@
 id: BID-OBJ-001
 name: Bidding Objective Mismatch
-version: 1.0.0
+version: 1.0.1
 category: bidding
 description: Flag a bidding strategy that does not align with the declared business optimization objective.
 when:
@@ -32,3 +32,6 @@ related_skills:
   - bidding-strategy
   - conversion-tracking
   - account-audit
+knowledge_dependencies:
+  - knowledge/bidding/bidding-principles.md
+  - knowledge/measurement/conversion-framework.md
