@@ -1,0 +1,34 @@
+id: AD-PIN-001
+name: Excessive RSA Pinning
+version: 1.0.0
+category: ad
+description: Flag heavy RSA pinning when there is no documented messaging requirement that justifies reduced asset combinations.
+when:
+  all:
+    - ad_type == responsive_search_ad
+    - pinned_asset_ratio > 0.5
+    - mandatory_message_requirement == false
+exclude_when:
+  - legal_or_brand_requirement_requires_pinning == true
+severity:
+  level: low
+confidence:
+  level: high
+evidence_required:
+  - ad_assets
+  - pin_configuration
+  - business_or_legal_messaging_requirement
+finding:
+  title: RSA pinning may unnecessarily restrict combinations
+recommendation:
+  - review_pinning
+  - unpin_nonessential_assets
+impact:
+  dimension: scale
+  level: low
+action:
+  type: recommend
+human_approval_required: true
+related_skills:
+  - ad-copy
+  - performance-diagnosis
