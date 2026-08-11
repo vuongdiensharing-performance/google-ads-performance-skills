@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-08-11 — Phase 6 Gate 2 Preparation
+
+### Changed
+
+- Upgraded `skills/registry.yaml` to a machine-readable `skill-dependency-graph/v1` registry with exact repository-relative Knowledge and Rule paths.
+- Rewired all 18 Core Skills with explicit `knowledge_dependencies` and exact `rule_dependencies` in frontmatter.
+- Added conditional Rule dependency declarations for `account-audit` so Search/ad and PMax/Shopping Rules are activated by explicit conditions rather than filename inference.
+- Bumped the 18 Core Skill versions to `1.2.0` to mark the dependency-contract change.
+- Upgraded `docs/SKILL_SPEC.md` to define exact dependency-path and registry-consistency requirements.
+- Upgraded `docs/SKILL_REGISTRY.md` to document the v2 dependency graph contract.
+- Extended `scripts/validate_skills.py` to cross-check registry ↔ Skill frontmatter, validate exact dependency paths, and reject inference-based dependency declarations.
+
+### Design decisions
+
+- Consumers must never infer Rule filenames from category names, directory names, or descriptive labels.
+- Skill frontmatter and `skills/registry.yaml` are mirrored, cross-validated declarations of the same dependency graph.
+- Conditional Rules retain exact repository paths; only their activation condition is conditional.
+- The dependency graph is designed for Gemini repository grounding and future orchestrator/runtime resolution.
+
 ## 2026-08-11 — Phase 3B
 
 ### Added
