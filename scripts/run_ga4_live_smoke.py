@@ -13,6 +13,7 @@ command is pinned to the provider commit declared in providers/google_analytics.
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import shlex
 import subprocess
@@ -20,8 +21,6 @@ import sys
 from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
-
-import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_PROVIDER_COMMIT = "a8ca729d4a8fa99bffe87962c17c0539c6aa9da7"
@@ -59,36 +58,6 @@ def build_contract(property_id: str, start_date: str, end_date: str) -> dict[str
     }
 
 
-def compile_mcp_request(canonical: dict[str, Any]) -> dict[str, Any]:
-    """Compile the validated canonical query into the upstream MCP shape."""
-    request = canonical["request"]
-    provider_request: dict[str, Any] = {
-        "property_id": request["property_id"],
-        "date_ranges": [request["date_range"]],
-        "dimensions": request["dimensions"],
-        "metrics": request["metrics"],
-    }
-
-    filters = request.get("filters", {})
-    expressions = [
-        {
-            "filter": {
-                "field_name": name,
-                "string_filter": {"match_type": "EXACT", "value": value},
-            }
-        }
-        for name, value in sorted(filters.items())
-    ]
-    if expressions:
-        provider_request["dimension_filter"] = (
-            expressions[0]
-            if len(expressions) == 1
-            else {"and_group": {"expressions": expressions}}
-        )
-
-    return provider_request
-
-
 def parse_args() -> argparse.Namespace:
     today = date.today()
     parser = argparse.ArgumentParser(description="Live GA4 read-only MCP smoke test")
@@ -123,7 +92,10 @@ def main() -> int:
     args = parse_args()
 
     if not args.property_id or not args.property_id.isdigit():
-        return fail("GA4 Property ID is required and must be numeric (use --property-id or GA4_PROPERTY_ID).")
+        return fail(
+            "GA4 Property ID is required and must be numeric "
+            "(use --property-id or GA4_PROPERTY_ID)."
+        )
 
     if not os.getenv("GOOGLE_PROJECT_ID"):
         return fail("GOOGLE_PROJECT_ID is required for the pinned Google Analytics MCP runtime.")
@@ -136,21 +108,23 @@ def main() -> int:
         if query_errors or canonical is None:
             return fail("Query Contract rejected:\n  - " + "\n  - ".join(query_errors))
 
-        provider_request = compile_mcp_request(canonical)
         provider = load_yaml(PROVIDER_PATH)
         evidence_schema = load_json(SCHEMA_EVIDENCE_PATH)
-
         command = shlex.split(args.mcp_command)
+
         print("=" * 64)
         print("GA4 LIVE SMOKE TEST")
         print("=" * 64)
-        print(f"query_id:          {canonical['query_id']}")
-        print(f"property_id:       {contract['property_id']}")
-        print(f"date_range:        {contract['date_range']['start_date']} -> {contract['date_range']['end_date']}")
-        print(f"provider_version:  {DEFAULT_PROVIDER_VERSION}")
-        print(f"provider_commit:   {DEFAULT_PROVIDER_COMMIT}")
-        print(f"mcp_command:       {' '.join(command)}")
-        print("authentication:     Application Default Credentials")
+        print(f"query_id:            {canonical['query_id']}")
+        print(f"property_id:         {contract['property_id']}")
+        print(
+            f"date_range:          {contract['date_range']['start_date']} -> "
+            f"{contract['date_range']['end_date']}"
+        )
+        print(f"provider_version:    {DEFAULT_PROVIDER_VERSION}")
+        print(f"provider_commit:     {DEFAULT_PROVIDER_COMMIT}")
+        print(f"mcp_command:         {' '.join(command)}")
+        print("authentication:       Application Default Credentials")
         print()
 
         with StdioMCPClient(command, timeout_seconds=120) as client:
@@ -159,7 +133,7 @@ def main() -> int:
                 provider_version=DEFAULT_PROVIDER_VERSION,
                 provider_commit=DEFAULT_PROVIDER_COMMIT,
             )
-            evidence = adapter.run_report(contract["property_id"], provider_request)
+            evidence = adapter.run_report(contract["property_id"], canonical["request"])
 
         errors = validate_evidence(evidence, evidence_schema, provider)
         if errors:
@@ -173,13 +147,11 @@ def main() -> int:
             )
 
         print("PASS: live GA4 report returned and passed Evidence Contract validation.")
-        print(f"evidence_type:     {evidence['evidence_type']}")
+        print(f"evidence_type:       {evidence['evidence_type']}")
         print(f"request_fingerprint: {expected_fingerprint}")
-        print("source_verified:    true")
-        print("inference_used:     false")
+        print("source_verified:     true")
+        print("inference_used:      false")
         if args.print_evidence:
-            import json
-
             print(json.dumps(evidence, ensure_ascii=False, indent=2))
         return 0
     except subprocess.CalledProcessError as exc:
