@@ -1,0 +1,35 @@
+id: CV-PRIMARY-001
+name: Micro Conversion Used as Primary
+version: 1.0.0
+category: conversion
+description: Flag a low-business-value micro conversion configured as a primary bidding signal when a stronger business outcome exists.
+when:
+  all:
+    - conversion_action.is_micro_conversion == true
+    - conversion_action.primary == true
+    - stronger_business_outcome_available == true
+exclude_when:
+  - micro_conversion_is_intentionally_the_business_goal == true
+severity:
+  level: high
+confidence:
+  level: medium
+evidence_required:
+  - conversion_action
+  - primary_status
+  - business_goal
+  - stronger_conversion_action
+finding:
+  title: A micro conversion may be steering bidding instead of the intended business outcome
+recommendation:
+  - review_primary_secondary_assignment
+  - validate_business_goal_mapping
+impact:
+  dimension: measurement_risk
+  level: high
+action:
+  type: investigate
+human_approval_required: true
+related_skills:
+  - conversion-tracking
+  - bidding-strategy
