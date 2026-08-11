@@ -1,28 +1,21 @@
 #!/usr/bin/env python3
-"""Minimal rule engine for Google Ads Performance Skills.
-
-The engine evaluates YAML rules against a JSON-compatible context. It is
-intentionally deterministic and evidence-first; it does not invent missing
-values or infer thresholds that are not encoded in a rule.
-
-Usage:
-    python scripts/rule_engine.py --rules rules --input examples/rule-engine/context.json
-"""
+"""Deterministic Rule Engine for Google Ads Performance Skills."""
 
 from __future__ import annotations
 
 import argparse
 import json
+import re
 from pathlib import Path
 from typing import Any
 
 import yaml
 
 MUTATING_ACTIONS = {"pause", "increase", "decrease", "change"}
+EXPRESSION_RE = re.compile(r"^\s*(?P<path>[A-Za-z0-9_.-]+)\s*(?P<op>==|!=|>=|<=|>|<|\bin\b|\bnot in\b)\s*(?P<value>.+?)\s*$")
 
 
 def get_path(data: Any, path: str) -> tuple[bool, Any]:
-    """Read dotted paths from nested dictionaries."""
     current = data
     for part in path.split("."):
         if isinstance(current, dict) and part in current:
@@ -33,44 +26,74 @@ def get_path(data: Any, path: str) -> tuple[bool, Any]:
 
 
 def resolve(value: Any, context: dict[str, Any]) -> Any:
-    """Resolve a context reference written as `$path`."""
     if isinstance(value, str) and value.startswith("$"):
         found, resolved = get_path(context, value[1:])
         return resolved if found else None
     return value
 
 
+def parse_expression_value(raw: str) -> Any:
+    raw = raw.strip().strip('"').strip("'")
+    lowered = raw.lower()
+    if lowered == "true":
+        return True
+    if lowered == "false":
+        return False
+    if lowered in {"null", "none"}:
+        return None
+    try:
+        if "." in raw:
+            return float(raw)
+        return int(raw)
+    except ValueError:
+        return raw
+
+
 def compare(actual: Any, expected: Any, operator: str, context: dict[str, Any]) -> bool:
     expected = resolve(expected, context)
-    if operator == "eq":
-        return actual == expected
-    if operator == "ne":
-        return actual != expected
-    if operator == "in":
-        return actual in expected
-    if operator == "not_in":
-        return actual not in expected
-    if operator == "gt":
-        return actual is not None and actual > expected
-    if operator == "gte":
-        return actual is not None and actual >= expected
-    if operator == "lt":
-        return actual is not None and actual < expected
-    if operator == "lte":
-        return actual is not None and actual <= expected
-    if operator == "contains":
-        return expected in actual if actual is not None else False
+    try:
+        if operator in {"eq", "=="}:
+            return actual == expected
+        if operator in {"ne", "!="}:
+            return actual != expected
+        if operator in {"in"}:
+            return actual in expected
+        if operator in {"not_in", "not in"}:
+            return actual not in expected
+        if operator in {"gt", ">"}:
+            return actual is not None and actual > expected
+        if operator in {"gte", ">="}:
+            return actual is not None and actual >= expected
+        if operator in {"lt", "<"}:
+            return actual is not None and actual < expected
+        if operator in {"lte", "<="}:
+            return actual is not None and actual <= expected
+        if operator == "contains":
+            return expected in actual if actual is not None else False
+    except (TypeError, ValueError):
+        return False
     return False
 
 
+def evaluate_expression(expression: str, context: dict[str, Any]) -> bool:
+    match = EXPRESSION_RE.match(expression)
+    if not match:
+        return False
+    found, actual = get_path(context, match.group("path"))
+    if not found:
+        return False
+    expected = parse_expression_value(match.group("value"))
+    return compare(actual, expected, match.group("op"), context)
+
+
 def evaluate_condition(condition: Any, context: dict[str, Any]) -> bool:
-    """Evaluate the small declarative condition language used by Rule Spec v1."""
+    """Evaluate Rule Spec v1 condition syntax, including expression-list rules."""
     if condition in (None, [], {}):
         return True
-
+    if isinstance(condition, str):
+        return evaluate_expression(condition, context)
     if isinstance(condition, list):
         return all(evaluate_condition(item, context) for item in condition)
-
     if not isinstance(condition, dict):
         return bool(condition)
 
@@ -84,21 +107,10 @@ def evaluate_condition(condition: Any, context: dict[str, Any]) -> bool:
     for key, expected in condition.items():
         found, actual = get_path(context, key)
         if isinstance(expected, dict):
-            if "not_in" in expected:
-                if not found or actual in [resolve(v, context) for v in expected["not_in"]]:
+            for operator, value in expected.items():
+                op = {"equals": "eq", "not_equals": "ne"}.get(operator, operator)
+                if not found or not compare(actual, value, op, context):
                     return False
-            elif "in" in expected:
-                if not found or actual not in [resolve(v, context) for v in expected["in"]]:
-                    return False
-            else:
-                for operator, value in expected.items():
-                    op = operator
-                    if op == "equals":
-                        op = "eq"
-                    if op == "not_equals":
-                        op = "ne"
-                    if not found or not compare(actual, value, op, context):
-                        return False
         else:
             if not found or actual != resolve(expected, context):
                 return False
@@ -106,11 +118,6 @@ def evaluate_condition(condition: Any, context: dict[str, Any]) -> bool:
 
 
 def evidence_available(requirement: str, context: dict[str, Any]) -> bool:
-    """Check whether a declared evidence item is present and non-null.
-
-    Evidence names are intentionally semantic. A caller can satisfy them with
-    either an exact context key or a nested `evidence` key.
-    """
     candidates = [requirement, f"evidence.{requirement}"]
     aliases = {
         "keyword_match_type": ["keyword.match_type", "match_type"],
@@ -136,9 +143,7 @@ def evidence_available(requirement: str, context: dict[str, Any]) -> bool:
 
 
 def evaluate_exclusions(exclusions: Any, context: dict[str, Any]) -> bool:
-    if not exclusions:
-        return False
-    return any(evaluate_condition(item, context) for item in exclusions)
+    return bool(exclusions) and any(evaluate_condition(item, context) for item in exclusions)
 
 
 def load_rules(rule_dir: Path) -> list[dict[str, Any]]:
@@ -155,24 +160,14 @@ def evaluate_rule(rule: dict[str, Any], context: dict[str, Any]) -> dict[str, An
     required = rule.get("evidence_required", [])
     missing = [item for item in required if not evidence_available(item, context)]
     if missing:
-        return {
-            "rule_id": rule.get("id"),
-            "status": "insufficient_evidence",
-            "missing_evidence": missing,
-            "source": rule.get("_source"),
-        }
-
+        return {"rule_id": rule.get("id"), "status": "insufficient_evidence", "missing_evidence": missing, "source": rule.get("_source")}
     if evaluate_exclusions(rule.get("exclude_when"), context):
         return {"rule_id": rule.get("id"), "status": "excluded", "source": rule.get("_source")}
-
-    matched = evaluate_condition(rule.get("when"), context)
-    if not matched:
+    if not evaluate_condition(rule.get("when"), context):
         return {"rule_id": rule.get("id"), "status": "not_matched", "source": rule.get("_source")}
 
     action_type = (rule.get("action") or {}).get("type", "recommend")
-    declared_approval = bool(rule.get("human_approval_required", False))
-    approval_required = declared_approval or action_type in MUTATING_ACTIONS
-
+    approval_required = bool(rule.get("human_approval_required", False)) or action_type in MUTATING_ACTIONS
     return {
         "rule_id": rule.get("id"),
         "status": "matched",
@@ -203,10 +198,8 @@ def main() -> None:
     parser.add_argument("--rules", default="rules", type=Path)
     parser.add_argument("--input", required=True, type=Path)
     args = parser.parse_args()
-
     with args.input.open("r", encoding="utf-8") as handle:
         context = json.load(handle)
-
     print(json.dumps(run(args.rules, context), indent=2, ensure_ascii=False))
 
 
