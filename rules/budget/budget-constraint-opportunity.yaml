@@ -19,7 +19,7 @@ evidence_required:
   - budget_status
   - performance_metrics
   - business_target
-  - incremental_opportunity_evidence
+  - incremental_opportunity_validated
 finding:
   title: Campaign may have room to scale under a constrained budget
 recommendation:
@@ -45,7 +45,7 @@ boundary_contract:
     - budget_status
     - performance_metrics
     - business_target
-    - incremental_opportunity_evidence
+    - incremental_opportunity_validated
   states:
     A: {state: APPLICABLE_VALID}
     B: {state: APPLICABLE_TRIGGERED}
