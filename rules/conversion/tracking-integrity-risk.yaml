@@ -1,0 +1,33 @@
+id: CV-TRACK-001
+name: Conversion Tracking Integrity Risk
+version: 1.0.0
+category: conversion
+description: Flag a conversion setup when tracking validation identifies material duplication, missing firing, or attribution integrity issues.
+when:
+  all:
+    - tracking_validation.status == failed
+exclude_when:
+  - issue_is_known_and_documented == true
+severity:
+  level: critical
+confidence:
+  level: high
+evidence_required:
+  - tracking_validation
+  - conversion_action_configuration
+  - test_event_or_debug_evidence
+finding:
+  title: Conversion tracking integrity is compromised
+recommendation:
+  - fix_tracking_before_optimizing_campaigns
+  - revalidate_primary_conversion_actions
+impact:
+  dimension: measurement_risk
+  level: critical
+action:
+  type: investigate
+human_approval_required: true
+related_skills:
+  - conversion-tracking
+  - performance-diagnosis
+  - bidding-strategy
