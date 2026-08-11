@@ -50,7 +50,7 @@ skills:
     PASS: {context: {budget_limited: false, quality: strong}, expected: pass}
     FAIL: {context: {budget_limited: true, quality: strong, marginal_opportunity: high}, expected: fail}
     INSUFFICIENT_EVIDENCE: {context: {budget: unknown}, expected: insufficient_evidence}
-    FALSE_POSITIVE: {context: {budget_limited: true, quality: poor}, expected: no_scale}
+    FALSE_POSITIVE: {context: {budget_limited: true, quality: poor}, expected: no_finding}
   pmax-optimization:
     PASS: {context: {primary_goal: qualified_lead, learning: stable}, expected: pass}
     FAIL: {context: {primary_goal: micro_conversion, recent_change: true}, expected: fail}
