@@ -1,6 +1,6 @@
 id: BID-SIGNAL-001
 name: Bidding Conversion Signal Risk
-version: 1.0.0
+version: 1.0.1
 category: bidding
 description: Flag Smart Bidding when the primary conversion signal is known to be unreliable or materially disconnected from the business outcome.
 when:
@@ -33,3 +33,7 @@ related_skills:
   - conversion-tracking
   - bidding-strategy
   - performance-diagnosis
+knowledge_dependencies:
+  - knowledge/bidding/bidding-principles.md
+  - knowledge/measurement/conversion-framework.md
+  - knowledge/analytics/performance-diagnosis.md
