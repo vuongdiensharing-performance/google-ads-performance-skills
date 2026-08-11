@@ -48,18 +48,42 @@ def validate_schema(contract: dict[str, Any], schema: dict[str, Any]) -> list[st
     return [error.message for error in sorted(validator.iter_errors(contract), key=lambda item: list(item.path))]
 
 
-def canonical_request(contract: dict[str, Any], catalog: dict[str, Any]) -> dict[str, Any]:
-    filters = contract.get("filters", {})
+def _dimension_filter(filters: dict[str, str]) -> dict[str, Any] | None:
+    """Translate the repository filter shorthand to the pinned MCP shape."""
+    if not filters:
+        return None
+    if len(filters) != 1:
+        raise ValueError("GA4-CV-001 currently permits at most one dimension filter")
+    field_name, value = next(iter(filters.items()))
     return {
-        "tool": catalog["tool"],
-        "request": {
-            "property_id": contract["property_id"],
-            "date_range": contract["date_range"],
-            "dimensions": catalog.get("allowed_dimensions", []),
-            "metrics": catalog.get("required_metrics", []),
-            "filters": filters,
-        },
+        "filter": {
+            "field_name": field_name,
+            "string_filter": {
+                "match_type": "EXACT",
+                "value": value,
+                "case_sensitive": False,
+            },
+        }
     }
+
+
+def canonical_request(contract: dict[str, Any], catalog: dict[str, Any]) -> dict[str, Any]:
+    """Build the exact snake_case request accepted by the pinned MCP server."""
+    request: dict[str, Any] = {
+        "property_id": contract["property_id"],
+        "date_ranges": [
+            {
+                "start_date": contract["date_range"]["start_date"],
+                "end_date": contract["date_range"]["end_date"],
+            }
+        ],
+        "dimensions": catalog.get("allowed_dimensions", []),
+        "metrics": catalog.get("required_metrics", []),
+    }
+    dimension_filter = _dimension_filter(contract.get("filters", {}))
+    if dimension_filter is not None:
+        request["dimension_filter"] = dimension_filter
+    return {"tool": catalog["tool"], "request": request}
 
 
 def fingerprint(canonical: dict[str, Any]) -> str:
@@ -130,8 +154,7 @@ def main() -> int:
     print(f"OK   {args.fixture.resolve().relative_to(ROOT)}")
     print(f"     query_id={canonical['query_id']}")
     print(f"     tool={canonical['tool']}")
-    print(f"     dimensions={canonical['request']['dimensions']}")
-    print(f"     metrics={canonical['request']['metrics']}")
+    print(f"     request={json.dumps(canonical['request'], sort_keys=True)}")
     print(f"     request_fingerprint={canonical['request_fingerprint']}")
     print("     inference_used=false")
     return 0

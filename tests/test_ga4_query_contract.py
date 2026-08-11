@@ -32,6 +32,11 @@ class GA4QueryContractTests(unittest.TestCase):
         self.assertEqual(canonical["tool"], "run_report")
         self.assertEqual(canonical["request"]["dimensions"], ["sessionCampaignName"])
         self.assertEqual(canonical["request"]["metrics"], ["sessions", "conversions"])
+        self.assertEqual(
+            canonical["request"]["date_ranges"],
+            [{"start_date": "2026-08-01", "end_date": "2026-08-10"}],
+        )
+        self.assertNotIn("date_range", canonical["request"])
         self.assertRegex(canonical["request_fingerprint"], r"^sha256:[0-9a-f]{64}$")
 
     def test_arbitrary_metric_is_rejected(self):
