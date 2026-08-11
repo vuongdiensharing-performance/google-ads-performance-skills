@@ -1,0 +1,37 @@
+id: STR-FRAG-001
+name: Campaign Fragmentation Risk
+version: 1.0.0
+category: structure
+description: Flag excessive campaign or ad-group fragmentation when materially similar intent and economics are split without a control or reporting requirement.
+when:
+  all:
+    - campaigns_have_materially_similar_intent == true
+    - fragmentation_reason == none
+    - evidence.data_density_is_low == true
+exclude_when:
+  - budget_or_bidding_control_requires_separation == true
+  - geography_or_business_unit_requires_separation == true
+severity:
+  level: medium
+confidence:
+  level: medium
+evidence_required:
+  - campaign_structure
+  - intent_mapping
+  - volume_or_conversion_density
+  - separation_reason
+finding:
+  title: Account structure may be fragmented beyond the data available
+recommendation:
+  - evaluate_consolidation
+  - preserve_separation_only_when_it_serves_a_real_control
+impact:
+  dimension: efficiency
+  level: medium
+action:
+  type: recommend
+human_approval_required: true
+related_skills:
+  - campaign-structure
+  - account-audit
+  - budget-optimization
