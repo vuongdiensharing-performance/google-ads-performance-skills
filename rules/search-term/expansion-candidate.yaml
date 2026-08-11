@@ -1,6 +1,6 @@
 id: ST-EXPAND-001
 name: High Value Search Term Expansion Candidate
-version: 1.0.0
+version: 1.0.1
 category: search_term
 description: Identify search terms that show validated commercial relevance and downstream value and may deserve keyword expansion.
 when:
@@ -32,3 +32,7 @@ human_approval_required: true
 related_skills:
   - search-term-analysis
   - keyword-research
+knowledge_dependencies:
+  - knowledge/search/search-term-methodology.md
+  - knowledge/keyword/keyword-intent.md
+  - knowledge/measurement/conversion-framework.md
