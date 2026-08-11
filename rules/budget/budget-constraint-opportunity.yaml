@@ -1,6 +1,6 @@
 id: BUD-OPP-001
 name: Budget Constraint With Proven Opportunity
-version: 1.0.0
+version: 1.0.1
 category: budget
 description: Flag campaigns that are materially budget constrained while meeting the business efficiency target and showing validated incremental opportunity.
 when:
@@ -34,3 +34,6 @@ human_approval_required: true
 related_skills:
   - budget-optimization
   - performance-diagnosis
+knowledge_dependencies:
+  - knowledge/bidding/bidding-principles.md
+  - knowledge/analytics/performance-diagnosis.md
