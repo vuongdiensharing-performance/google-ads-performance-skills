@@ -1,0 +1,35 @@
+id: PMAX-NEG-001
+name: Overrestrictive PMax Negative Keywords
+version: 1.0.0
+category: pmax
+description: Flag broad or extensive negative-keyword exclusions in PMax when they may block valuable demand without a clear safety or irrelevance justification.
+when:
+  all:
+    - campaign_type == performance_max
+    - negative_exclusion_scope == broad_or_extensive
+    - exclusion_reason != essential_brand_safety
+    - exclusion_reason != completely_irrelevant
+exclude_when:
+  - current_google_controls_require_exclusion == true
+severity:
+  level: medium
+confidence:
+  level: high
+evidence_required:
+  - negative_keyword_list
+  - search_term_or_query_evidence
+  - exclusion_reason
+finding:
+  title: PMax exclusions may be more restrictive than necessary
+recommendation:
+  - review_negative_scope
+  - use_brand_exclusions_for_brand_protection_when_appropriate
+impact:
+  dimension: scale
+  level: medium
+action:
+  type: investigate
+human_approval_required: true
+related_skills:
+  - pmax-optimization
+  - search-term-analysis
