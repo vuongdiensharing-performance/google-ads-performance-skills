@@ -1,6 +1,6 @@
 ---
 name: competitor-analysis
-version: 1.1.0
+version: 1.1.1
 description: Analyze observable competitor positioning, search presence, messaging, and auction context to inform Google Ads strategy.
 category: strategy
 status: core
@@ -16,8 +16,6 @@ Turn observable competitor signals into strategic hypotheses without treating co
 - The competitor set or observable evidence is undefined.
 ## Required Inputs
 Market, offer, geography, competitor set, and available search/auction/creative evidence.
-## Optional Inputs
-Historical snapshots, landing pages, ad archives, auction insights, search-term evidence.
 ## Preconditions
 Separate observed competitor facts from inferred strategy.
 ## Knowledge Dependencies
@@ -48,7 +46,7 @@ Use competitor evidence to form hypotheses, not to copy blindly. Time-bound obse
 ## Confidence
 High for directly observed facts; Medium for interpretation; Low for inferred internal strategy.
 ## Safety
-Do not invent competitor spend, conversion rate, profitability, or internal strategy.
+Do not invent competitor spend, conversion rate, profitability, or internal strategy. Any campaign, keyword, ad, or budget change based on competitor analysis requires explicit human approval before execution.
 ## Related Skills
 `campaign-strategy`, `keyword-research`, `ad-copy`, `landing-page-audit`
 ## Examples
