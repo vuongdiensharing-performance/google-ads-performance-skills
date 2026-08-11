@@ -128,11 +128,10 @@ class GoogleAnalyticsMCPAdapter:
     def _validate_request(tool: str, request: dict[str, Any]) -> None:
         if not isinstance(request, dict):
             raise GA4AdapterError("MCP request must be an object")
-        if tool != "get_account_summaries":
-            property_id = request.get("property_id")
-            if not isinstance(property_id, str) or not property_id.isdigit() is False:
-                if not isinstance(property_id, str) or not property_id.startswith("properties/"):
-                    raise GA4AdapterError("property_id is required and must match properties/<numeric_id>")
-            suffix = property_id.removeprefix("properties/")
-            if not suffix.isdigit():
-                raise GA4AdapterError("property_id must match properties/<numeric_id>")
+        if tool == "get_account_summaries":
+            return
+        property_id = request.get("property_id")
+        if not isinstance(property_id, str) or not property_id.startswith("properties/"):
+            raise GA4AdapterError("property_id is required and must match properties/<numeric_id>")
+        if not property_id.removeprefix("properties/").isdigit():
+            raise GA4AdapterError("property_id must match properties/<numeric_id>")
