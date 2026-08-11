@@ -34,6 +34,13 @@ cases:
       geography_or_business_unit_requires_separation: false
       evidence:
         data_density_is_low: false
+        required_fields_missing: false
+        sample_size_insufficient: false
+        tracking_quality_unknown: false
+        conversion_lag_active: false
+        evidence_completeness_status: complete
+        sample_adequacy_status: adequate
+        tracking_quality_status: known
       campaign_structure: documented
       intent_mapping: documented
       volume_or_conversion_density: sufficient
@@ -71,6 +78,13 @@ cases:
       geography_or_business_unit_requires_separation: false
       evidence:
         data_density_is_low: true
+        required_fields_missing: false
+        sample_size_insufficient: false
+        tracking_quality_unknown: false
+        conversion_lag_active: false
+        evidence_completeness_status: complete
+        sample_adequacy_status: adequate
+        tracking_quality_status: known
       campaign_structure: fragmented
       intent_mapping: documented
       volume_or_conversion_density: low
@@ -132,6 +146,13 @@ cases:
       geography_or_business_unit_requires_separation: true
       evidence:
         data_density_is_low: true
+        required_fields_missing: false
+        sample_size_insufficient: false
+        tracking_quality_unknown: false
+        conversion_lag_active: false
+        evidence_completeness_status: complete
+        sample_adequacy_status: adequate
+        tracking_quality_status: known
       campaign_structure: fragmented
       intent_mapping: documented
       volume_or_conversion_density: sufficient
