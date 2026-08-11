@@ -1,0 +1,115 @@
+version: 1.0.0
+schema: rule-knowledge-provenance/v1
+dependency_policy:
+  knowledge: exact_repository_paths
+  no_inference: true
+  source_of_truth: each_rule_and_this_registry
+rules:
+  - id: STR-FRAG-001
+    path: rules/structure/fragmentation-risk.yaml
+    knowledge:
+      - knowledge/structure/account-structure.md
+  - id: STR-INTENT-001
+    path: rules/structure/mixed-intent-campaign.yaml
+    knowledge:
+      - knowledge/structure/account-structure.md
+      - knowledge/strategy/intent-framework.md
+  - id: BID-OBJ-001
+    path: rules/bidding/objective-strategy-mismatch.yaml
+    knowledge:
+      - knowledge/bidding/bidding-principles.md
+      - knowledge/measurement/conversion-framework.md
+  - id: BID-LEARN-001
+    path: rules/bidding/frequent-target-changes.yaml
+    knowledge:
+      - knowledge/bidding/bidding-principles.md
+      - knowledge/analytics/performance-diagnosis.md
+  - id: BID-SIGNAL-001
+    path: rules/bidding/conversion-signal-risk.yaml
+    knowledge:
+      - knowledge/bidding/bidding-principles.md
+      - knowledge/measurement/conversion-framework.md
+      - knowledge/analytics/performance-diagnosis.md
+  - id: ST-IRRELEVANT-001
+    path: rules/search-term/irrelevant-intent.yaml
+    knowledge:
+      - knowledge/search/search-term-methodology.md
+      - knowledge/keyword/keyword-intent.md
+  - id: ST-SPEND-001
+    path: rules/search-term/high-spend-zero-conversion.yaml
+    knowledge:
+      - knowledge/search/search-term-methodology.md
+      - knowledge/measurement/conversion-framework.md
+      - knowledge/analytics/performance-diagnosis.md
+  - id: ST-EXPAND-001
+    path: rules/search-term/expansion-candidate.yaml
+    knowledge:
+      - knowledge/search/search-term-methodology.md
+      - knowledge/keyword/keyword-intent.md
+      - knowledge/measurement/conversion-framework.md
+  - id: CV-PRIMARY-001
+    path: rules/conversion/primary-micro-conversion.yaml
+    knowledge:
+      - knowledge/measurement/conversion-framework.md
+      - knowledge/bidding/bidding-principles.md
+  - id: CV-TRACK-001
+    path: rules/conversion/tracking-integrity-risk.yaml
+    knowledge:
+      - knowledge/measurement/conversion-framework.md
+      - knowledge/analytics/performance-diagnosis.md
+  - id: CV-LEAD-001
+    path: rules/conversion/lead-quality-gap.yaml
+    knowledge:
+      - knowledge/measurement/conversion-framework.md
+      - knowledge/analytics/performance-diagnosis.md
+  - id: BUD-OPP-001
+    path: rules/budget/budget-constraint-opportunity.yaml
+    knowledge:
+      - knowledge/bidding/bidding-principles.md
+      - knowledge/analytics/performance-diagnosis.md
+  - id: BUD-SCALE-001
+    path: rules/budget/scale-with-quality-risk.yaml
+    knowledge:
+      - knowledge/analytics/performance-diagnosis.md
+      - knowledge/measurement/conversion-framework.md
+  - id: KW-BROAD-001
+    path: rules/keyword/broad-without-smart-bidding.yaml
+    knowledge:
+      - knowledge/keyword/match-types.md
+      - knowledge/bidding/bidding-principles.md
+      - knowledge/measurement/conversion-framework.md
+  - id: KW-INTENT-001
+    path: rules/keyword/intent-theme-mismatch.yaml
+    knowledge:
+      - knowledge/keyword/keyword-intent.md
+      - knowledge/strategy/intent-framework.md
+      - knowledge/ads/rsa-message-match.md
+  - id: KW-QS-001
+    path: rules/keyword/low-quality-score-investigation.yaml
+    knowledge:
+      - knowledge/ads/rsa-message-match.md
+      - knowledge/analytics/performance-diagnosis.md
+  - id: AD-PIN-001
+    path: rules/ad/excessive-pinning.yaml
+    knowledge:
+      - knowledge/ads/rsa-message-match.md
+  - id: AD-MATCH-001
+    path: rules/ad/message-match-gap.yaml
+    knowledge:
+      - knowledge/ads/rsa-message-match.md
+      - knowledge/keyword/keyword-intent.md
+  - id: PMAX-GOAL-001
+    path: rules/pmax/primary-goal-missing.yaml
+    knowledge:
+      - knowledge/pmax/pmax-principles.md
+      - knowledge/measurement/conversion-framework.md
+  - id: PMAX-LEARN-001
+    path: rules/pmax/recent-change-learning.yaml
+    knowledge:
+      - knowledge/pmax/pmax-principles.md
+      - knowledge/analytics/performance-diagnosis.md
+  - id: PMAX-NEG-001
+    path: rules/pmax/overrestrictive-negative.yaml
+    knowledge:
+      - knowledge/pmax/pmax-principles.md
+      - knowledge/search/search-term-methodology.md
