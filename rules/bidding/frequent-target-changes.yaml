@@ -1,6 +1,6 @@
 id: BID-LEARN-001
 name: Frequent Smart Bidding Target Changes
-version: 1.0.0
+version: 1.0.1
 category: bidding
 description: Flag repeated target or conversion-goal changes during a learning period as a stability risk.
 when:
@@ -32,3 +32,6 @@ human_approval_required: true
 related_skills:
   - bidding-strategy
   - conversion-tracking
+knowledge_dependencies:
+  - knowledge/bidding/bidding-principles.md
+  - knowledge/analytics/performance-diagnosis.md
