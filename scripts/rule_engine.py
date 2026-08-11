@@ -13,14 +13,20 @@ import yaml
 
 MUTATING_ACTIONS = {"pause", "increase", "decrease", "change"}
 EXPRESSION_RE = re.compile(r"^\s*(?P<path>[A-Za-z0-9_.-]+)\s*(?P<op>==|!=|>=|<=|>|<|\bin\b|\bnot in\b)\s*(?P<value>.+?)\s*$")
-BOUNDARY_DECISIONS = {
-    "APPLICABLE_VALID": "PASS",
-    "APPLICABLE_TRIGGERED": "FAIL",
-    "APPLICABLE_MISSING_EVIDENCE": "INSUFFICIENT_EVIDENCE",
-    "NOT_APPLICABLE": "NOT_APPLICABLE",
-    "CONFLICTING_EVIDENCE": "POLICY_DEFINED",
-    "EXPLICIT_EXCLUSION": "SUPPRESSED",
-}
+CONTRACT_SCHEMA_PATH = Path(__file__).resolve().parents[1] / "schemas/boundary-contract.json"
+
+
+def _load_boundary_contract_metadata() -> tuple[list[str], dict[str, str], dict[str, bool]]:
+    data = json.loads(CONTRACT_SCHEMA_PATH.read_text(encoding="utf-8"))
+    precedence = data.get("x-canonical-resolution-precedence")
+    decisions = data.get("x-canonical-decisions")
+    findings = data.get("x-canonical-finding-generated")
+    if not isinstance(precedence, list) or not isinstance(decisions, dict) or not isinstance(findings, dict):
+        raise ValueError("boundary-contract.json is missing canonical runtime metadata")
+    return precedence, decisions, findings
+
+
+BOUNDARY_PRECEDENCE, BOUNDARY_DECISIONS, BOUNDARY_FINDINGS = _load_boundary_contract_metadata()
 
 
 def get_path(data: Any, path: str) -> tuple[bool, Any]:
@@ -155,49 +161,48 @@ def evaluate_exclusions(exclusions: Any, context: dict[str, Any]) -> bool:
 
 
 def _boundary_state(rule: dict[str, Any], context: dict[str, Any]) -> dict[str, Any]:
-    """Resolve the explicit A-F Boundary Contract without model inference."""
+    """Resolve the explicit A-F Boundary Contract using canonical contract metadata."""
     contract = rule.get("boundary_contract")
     if not isinstance(contract, dict):
         raise ValueError(f"Rule {rule.get('id')} has no boundary_contract")
 
     applicable = evaluate_condition({"all": contract.get("applicable_when", [])}, context)
-    if not applicable:
-        state = "NOT_APPLICABLE"
-        evidence_sufficient = True
-    else:
-        required = contract.get("evidence_required", rule.get("evidence_required", []))
-        missing = [item for item in required if not evidence_available(item, context)]
-        if missing:
-            state = "APPLICABLE_MISSING_EVIDENCE"
-            evidence_sufficient = False
-        elif evaluate_condition((contract.get("conflict_policy") or {}).get("when"), context):
-            state = "CONFLICTING_EVIDENCE"
-            evidence_sufficient = True
-        elif evaluate_exclusions(rule.get("exclude_when"), context):
-            state = "EXPLICIT_EXCLUSION"
-            evidence_sufficient = True
-        elif evaluate_condition(rule.get("when"), context):
-            state = "APPLICABLE_TRIGGERED"
-            evidence_sufficient = True
-        else:
-            state = "APPLICABLE_VALID"
-            evidence_sufficient = True
+    required = contract.get("evidence_required", rule.get("evidence_required", []))
+    missing = [item for item in required if not evidence_available(item, context)] if applicable else []
+    conflict = applicable and not missing and evaluate_condition((contract.get("conflict_policy") or {}).get("when"), context)
+    excluded = applicable and not missing and not conflict and evaluate_exclusions(rule.get("exclude_when"), context)
+    triggered = applicable and not missing and not conflict and not excluded and evaluate_condition(rule.get("when"), context)
 
+    candidates = {
+        "NOT_APPLICABLE": not applicable,
+        "APPLICABLE_MISSING_EVIDENCE": applicable and bool(missing),
+        "CONFLICTING_EVIDENCE": conflict,
+        "EXPLICIT_EXCLUSION": excluded,
+        "APPLICABLE_TRIGGERED": triggered,
+        "APPLICABLE_VALID": applicable and not missing and not conflict and not excluded and not triggered,
+    }
+    try:
+        state = next(state_id for state_id in BOUNDARY_PRECEDENCE if candidates.get(state_id) is True)
+    except StopIteration as exc:
+        raise ValueError(f"Rule {rule.get('id')} could not resolve a Boundary Contract state") from exc
+
+    evidence_sufficient = state != "APPLICABLE_MISSING_EVIDENCE"
     policy = (contract.get("conflict_policy") or {}).get("resolution", {})
     decision = BOUNDARY_DECISIONS[state]
     if state == "CONFLICTING_EVIDENCE":
         if policy.get("state") != state:
             raise ValueError(f"Rule {rule.get('id')} conflict policy must resolve to {state}")
+        if policy.get("inference_used") is not False:
+            raise ValueError(f"Rule {rule.get('id')} conflict policy cannot use inference")
         decision = policy.get("decision", decision)
 
-    finding_generated = state == "APPLICABLE_TRIGGERED"
     return {
         "rule_id": rule.get("id"),
         "boundary_state": state,
         "decision": decision,
         "inference_used": False,
         "evidence_sufficient": evidence_sufficient,
-        "finding_generated": finding_generated,
+        "finding_generated": BOUNDARY_FINDINGS[state],
         "audit_trail": {
             "evidence": context.get("evidence", context),
             "rule": str(rule.get("_source")),
@@ -234,6 +239,16 @@ def evaluate_rule(rule: dict[str, Any], context: dict[str, Any]) -> dict[str, An
     if boundary is not None:
         result["boundary"] = boundary
     return result
+
+
+def load_rules(rule_dir: Path) -> list[dict[str, Any]]:
+    rules = []
+    for path in sorted(rule_dir.rglob("*.yaml")):
+        with path.open("r", encoding="utf-8") as handle:
+            rule = yaml.safe_load(handle) or {}
+        rule["_source"] = str(path)
+        rules.append(rule)
+    return rules
 
 
 def run(rule_dir: Path, context: dict[str, Any]) -> dict[str, Any]:
