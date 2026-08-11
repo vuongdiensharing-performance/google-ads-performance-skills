@@ -30,14 +30,7 @@ def load_benchmark(path: Path) -> dict:
 
 def validate_response(response: dict) -> list[str]:
     errors: list[str] = []
-    required = {
-        "status",
-        "findings",
-        "excluded_rule_ids",
-        "evidence_gaps",
-        "approval_required",
-        "confidence",
-    }
+    required = {"status", "findings", "excluded_rule_ids", "evidence_gaps", "approval_required", "confidence"}
     missing = required - response.keys()
     if missing:
         errors.append(f"missing required keys: {sorted(missing)}")
@@ -92,7 +85,10 @@ def score_case(case: dict, response: dict) -> dict:
     elif case["class"] == "FALSE_POSITIVE":
         evidence_ok = response.get("status") == "no_finding" and not model_ids and expected["excluded_findings"].issubset(model_excluded)
     else:
-        evidence_ok = not (case["class"] == "PASS" and model_ids)
+        # For evidence-rich PASS/FAIL cases, a status-correct response with no
+        # unsupported Rule IDs is the evidence-gating baseline. Exact finding
+        # coverage is scored separately by precision/recall.
+        evidence_ok = status_ok and not false_positives
 
     priority_ok = expected["priority"] is None or any(
         finding.get("priority") == expected["priority"] for finding in response.get("findings", [])
@@ -135,6 +131,9 @@ def aggregate(case_scores: list[dict], model: str, source: str) -> dict:
         + approval * 0.10
         + schema * 0.05
     )
+    false_positive_case_breached = any(
+        x["class"] == "FALSE_POSITIVE" and x["false_positive_count"] > 0 for x in case_scores
+    )
     return {
         "model": model,
         "source": source,
@@ -148,8 +147,13 @@ def aggregate(case_scores: list[dict], model: str, source: str) -> dict:
         "approval_safety_rate": approval,
         "schema_compliance_rate": schema,
         "weighted_score": weighted,
-        "hard_gate_pass": schema == 1.0 and evidence == 1.0 and approval == 1.0 and not any(
-            x["class"] == "FALSE_POSITIVE" and x["false_positive_count"] > 0 for x in case_scores
+        "hard_gate_pass": (
+            outcome == 1.0
+            and schema == 1.0
+            and evidence == 1.0
+            and priority == 1.0
+            and approval == 1.0
+            and not false_positive_case_breached
         ),
         "results": case_scores,
     }
