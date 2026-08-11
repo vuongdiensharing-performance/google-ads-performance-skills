@@ -1,0 +1,37 @@
+id: BUD-SCALE-001
+name: Scale With Declining Conversion Quality
+version: 1.0.0
+category: budget
+description: Flag budget increases when spend or lead volume is rising while business-qualified conversion rate is deteriorating.
+when:
+  all:
+    - spend_trend == increasing
+    - conversion_volume_trend == increasing
+    - qualified_conversion_rate_trend == declining
+exclude_when:
+  - crm_data_is_stale == true
+  - sample_size_is_insufficient == true
+severity:
+  level: high
+confidence:
+  level: medium
+evidence_required:
+  - spend_trend
+  - conversion_volume_trend
+  - qualified_conversion_rate
+  - lookback_window
+finding:
+  title: Scaling is accompanied by declining conversion quality
+recommendation:
+  - pause_automatic_scale_up
+  - diagnose_traffic_mix_and_conversion_quality
+impact:
+  dimension: revenue
+  level: high
+action:
+  type: investigate
+human_approval_required: true
+related_skills:
+  - budget-optimization
+  - performance-diagnosis
+  - conversion-tracking
