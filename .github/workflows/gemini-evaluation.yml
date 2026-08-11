@@ -28,7 +28,7 @@ jobs:
       - run: pip install -r evals/gemini/requirements.txt
       - run: mkdir -p reports
       - run: python scripts/evaluate_gemini_account_audit.py --mode gemini --model "$GEMINI_MODEL" --json-out reports/account-audit-gemini.json
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: account-audit-gemini-report
