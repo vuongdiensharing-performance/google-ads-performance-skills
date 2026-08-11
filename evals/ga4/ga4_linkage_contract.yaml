@@ -1,0 +1,20 @@
+contract_version: "1.1.0"
+evidence_type: GA4_LINKAGE
+source:
+  provider: google_analytics
+  transport: mcp
+  tool: list_google_ads_links
+  property_id: properties/123456789
+request:
+  property_id: properties/123456789
+result:
+  data:
+    synthetic: true
+    google_ads_links: []
+provenance:
+  retrieved_at: "2026-08-11T10:00:00Z"
+  source_verified: true
+  inference_used: false
+  provider_version: "0.7.0"
+  provider_commit: "a8ca729d4a8fa99bffe87962c17c0539c6aa9da7"
+  request_fingerprint: "sha256:e5755c1190e9a3768691413c7baeb72ee1f2a2f03a57c5cfb37ec548c7b226ec"
