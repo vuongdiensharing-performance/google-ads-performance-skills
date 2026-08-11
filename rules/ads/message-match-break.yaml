@@ -1,0 +1,39 @@
+id: AD-MATCH-001
+name: Search-to-ad-to-landing-page message match break
+version: 1.0.0
+category: ad
+description: Flag a material mismatch between the user's intent, ad promise, and landing-page offer.
+when:
+  all:
+    - evidence.query_intent_available == true
+    - evidence.ad_promise_available == true
+    - evidence.landing_page_offer_available == true
+    - evidence.message_match_status == broken
+exclude_when:
+  - evidence.landing_page_content_unavailable == true
+evidence_required:
+  - query_or_keyword_intent
+  - ad_content
+  - landing_page_content
+  - message_match_assessment
+severity:
+  level: high
+confidence:
+  level: medium
+finding:
+  title: Material message-match break across query, ad, and landing page
+recommendation:
+  - rewrite_ad_message_or_realign_landing_page
+  - verify_conversion_path
+impact:
+  dimensions:
+    - conversion
+    - efficiency
+  level: high
+action:
+  type: recommend
+human_approval_required: true
+related_skills:
+  - ad-copy
+  - landing-page-audit
+  - performance-diagnosis
