@@ -1,9 +1,16 @@
 ---
 name: quality-score
-version: 1.1.0
+version: 1.2.0
 description: Diagnose Quality Score and component signals as relevance diagnostics while protecting qualified business outcomes.
 category: optimization
 status: core
+knowledge_dependencies:
+  - knowledge/keyword/match-types.md
+  - knowledge/ads/rsa-message-match.md
+  - knowledge/analytics/performance-diagnosis.md
+rule_dependencies:
+  - rules/keyword/low-quality-score-investigation.yaml
+  - rules/ad/message-match-gap.yaml
 ---
 # Quality Score
 ## Purpose
