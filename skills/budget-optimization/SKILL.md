@@ -1,9 +1,15 @@
 ---
 name: budget-optimization
-version: 1.1.0
+version: 1.2.0
 description: Reallocate Google Ads budget using performance evidence, marginal opportunity, business constraints, and portfolio logic.
 category: optimization
 status: core
+knowledge_dependencies:
+  - knowledge/bidding/bidding-principles.md
+  - knowledge/analytics/performance-diagnosis.md
+rule_dependencies:
+  - rules/budget/budget-constraint-opportunity.yaml
+  - rules/budget/scale-with-quality-risk.yaml
 ---
 # Budget Optimization
 ## Purpose
