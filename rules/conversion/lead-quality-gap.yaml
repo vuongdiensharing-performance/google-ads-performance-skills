@@ -1,0 +1,38 @@
+id: CV-LEAD-001
+name: Lead Quality Gap
+version: 1.0.0
+category: conversion
+description: Flag accounts where platform lead volume looks healthy but qualified-lead or downstream business quality is materially weak.
+when:
+  all:
+    - business_type == lead_generation
+    - crm_data_available == true
+    - qualified_lead_rate < business_target.qualified_lead_rate
+exclude_when:
+  - crm_data_is_stale == true
+  - sample_size_is_insufficient == true
+severity:
+  level: high
+confidence:
+  level: medium
+evidence_required:
+  - platform_conversions
+  - crm_leads
+  - qualified_leads
+  - business_target
+finding:
+  title: Lead volume is not translating into expected lead quality
+recommendation:
+  - audit_primary_conversion_definition
+  - segment_campaigns_by_lead_quality
+  - compare_search_term_and_audience_mix
+impact:
+  dimension: revenue
+  level: high
+action:
+  type: investigate
+human_approval_required: true
+related_skills:
+  - conversion-tracking
+  - performance-diagnosis
+  - audience-strategy
