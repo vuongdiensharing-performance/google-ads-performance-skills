@@ -1,9 +1,16 @@
 ---
 name: keyword-research
-version: 1.1.0
+version: 1.2.0
 description: Research and organize Google Ads keywords by intent, theme, match strategy, opportunity, and exclusions.
 category: acquisition
 status: core
+knowledge_dependencies:
+  - knowledge/keyword/keyword-intent.md
+  - knowledge/keyword/match-types.md
+  - knowledge/strategy/intent-framework.md
+rule_dependencies:
+  - rules/keyword/intent-theme-mismatch.yaml
+  - rules/bidding/broad-without-smart-bidding.yaml
 ---
 # Keyword Research
 ## Purpose
