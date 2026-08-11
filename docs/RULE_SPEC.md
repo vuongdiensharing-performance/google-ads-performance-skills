@@ -1,4 +1,4 @@
-# Rule Specification v1.1
+# Rule Specification v1.2
 
 ## Purpose
 
@@ -82,7 +82,9 @@ Every Rule must define:
 
 ## Knowledge provenance
 
-`knowledge_dependencies` is a mandatory machine-readable provenance declaration. It identifies the Knowledge assets that provide the principles/frameworks used to interpret the Rule's condition, evidence, finding, recommendation, or impact.
+`knowledge_dependencies` is a mandatory machine-readable provenance declaration on the **Rule itself**. The Rule-local declaration is the authoritative source of truth for Rule → Knowledge provenance.
+
+`rules/registry.yaml` is a machine-readable index and cross-check. Its `knowledge` list MUST exactly mirror the Rule-local `knowledge_dependencies`; it MUST NOT replace or override the Rule-local declaration.
 
 Consumers MUST NOT infer Rule → Knowledge relationships from:
 
@@ -90,9 +92,34 @@ Consumers MUST NOT infer Rule → Knowledge relationships from:
 - directory name;
 - Rule filename;
 - `related_skills`;
-- semantic similarity.
+- semantic similarity;
+- a Skill that happens to load both the Rule and a Knowledge asset.
 
-The declared paths must exist and must be mirrored by the Rule Knowledge Provenance Registry. A Rule may depend on multiple Knowledge assets when the decision spans multiple domains.
+The declared paths must exist and must be mirrored exactly by the Rule Knowledge Provenance Registry. A Rule may depend on multiple Knowledge assets when the decision spans multiple domains.
+
+## Provenance invariants
+
+For every active Rule:
+
+```text
+Rule YAML
+  └── knowledge_dependencies   ← SOURCE OF TRUTH
+              │
+              └─────────────── exact path(s)
+                               │
+                               ↓
+                       rules/registry.yaml
+                         machine-readable
+                       index + cross-check
+```
+
+A provenance validation MUST fail when:
+
+1. `knowledge_dependencies` is missing from the Rule;
+2. any declared Knowledge path does not exist;
+3. the Registry entry is missing;
+4. the Registry path differs from the Rule-local declaration;
+5. a Skill references a Rule that is absent from the Rule Provenance Registry.
 
 ## Evidence first
 
