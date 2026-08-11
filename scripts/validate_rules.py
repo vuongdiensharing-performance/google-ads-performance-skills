@@ -48,6 +48,9 @@ def main() -> int:
     args = parser.parse_args()
     failures = 0
     for path in sorted(args.rules.rglob("*.yaml")):
+        if path.resolve() == (args.rules / "registry.yaml").resolve():
+            print(f"SKIP {path} (Rule registry is validated by provenance checks)")
+            continue
         errors = validate(path)
         if errors:
             failures += 1
