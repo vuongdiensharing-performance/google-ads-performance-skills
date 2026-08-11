@@ -1,0 +1,38 @@
+{
+  "type": "object",
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["pass", "fail", "insufficient_evidence", "no_finding"]
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "rule_id": {"type": "string"},
+          "priority": {"type": "string", "enum": ["P0", "P1", "P2", "P3"]},
+          "observation": {"type": "string"},
+          "evidence": {"type": "array", "items": {"type": "string"}},
+          "confidence": {"type": "string", "enum": ["high", "medium", "low"]}
+        },
+        "required": ["rule_id", "priority", "observation", "evidence", "confidence"]
+      }
+    },
+    "excluded_rule_ids": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "evidence_gaps": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "approval_required": {"type": "boolean"},
+    "confidence": {
+      "type": "string",
+      "enum": ["high", "medium", "low"]
+    }
+  },
+  "required": ["status", "findings", "excluded_rule_ids", "evidence_gaps", "approval_required", "confidence"],
+  "additionalProperties": false
+}
