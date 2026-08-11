@@ -7,15 +7,14 @@ source:
   property_id: properties/123456789
 request:
   property_id: properties/123456789
-  date_range:
-    start_date: "2026-08-01"
-    end_date: "2026-08-10"
+  date_ranges:
+    - start_date: "2026-08-01"
+      end_date: "2026-08-10"
   dimensions:
     - sessionCampaignName
   metrics:
     - sessions
     - conversions
-  filters: []
 result:
   data:
     rows:
@@ -35,4 +34,4 @@ provenance:
   inference_used: false
   provider_version: "0.7.0"
   provider_commit: "a8ca729d4a8fa99bffe87962c17c0539c6aa9da7"
-  request_fingerprint: "sha256:815c4ca5764af8b7b5795f26d5b9897be2422b7ac9a5da66674c27a8c0dfbf41"
+  request_fingerprint: "sha256:0b79788383f5a2eca6f25afa894da047f76079cfc2e416c50c12d42cda5b6d7d"
