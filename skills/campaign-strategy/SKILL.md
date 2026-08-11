@@ -1,54 +1,57 @@
 ---
 name: campaign-strategy
-version: 1.0.0
-description: Design a Google Ads campaign strategy around demand, intent, business goals, constraints, and measurement.
+version: 1.1.0
+description: Translate business goals and demand intent into a Google Ads campaign strategy and measurement plan.
 category: strategy
 status: core
 ---
-
 # Campaign Strategy
-
 ## Purpose
-Translate business objectives into a Google Ads strategy and channel/campaign priorities.
-
+Turn business objectives into an intent-led campaign portfolio, bidding direction, budget logic, and measurement plan.
 ## Use When
 - Planning a new Google Ads program.
-- Reworking an account strategy.
-- Deciding where demand capture should start or expand.
-
+- Reworking account strategy after business, offer, or funnel changes.
+## Do Not Use When
+- The request is only keyword, ad, bid, or tracking execution.
 ## Required Inputs
-- Business objective and conversion definition.
-- Offer, market, geography, budget, and constraints.
-- Available historical performance when applicable.
-
+Business objective, primary conversion outcome, offer, market, geography, budget, constraints.
+## Optional Inputs
+Historical performance, CRM quality, margin/economics, competitor evidence.
+## Preconditions
+Validate the business outcome, conversion definition, market scope, and measurement maturity.
 ## Knowledge Dependencies
-- Intent framework
-- Demand capture
-- Account structure
-- Funnel strategy
-
+- `knowledge/strategy/intent-framework.md`
+- `knowledge/strategy/funnel-strategy.md`
+- `knowledge/structure/account-structure.md`
+- `knowledge/bidding/bidding-principles.md`
+## Rule Dependencies
+- `rules/structure/mixed-intent-campaign.yaml`
+- `rules/structure/fragmentation-risk.yaml`
 ## Workflow
-1. Define business outcome and conversion hierarchy.
-2. Map demand by intent.
-3. Identify highest-value demand tiers.
-4. Select campaign types and sequencing.
-5. Define budget logic and measurement requirements.
-6. Produce test/scale roadmap.
-
+1. Validate business outcome and constraints.
+2. Map demand by intent/funnel stage.
+3. Design campaign boundaries and sequencing.
+4. Define budget and bidding direction compatible with data maturity.
+5. Define conversion/learning signals.
+6. Run relevant structure Rules on the proposed context.
+7. Produce implementation, test, and measurement roadmap.
+## Rule Engine Contract
+Evaluate proposed `strategy_context` with the canonical Rule Engine. Matched Rules become design warnings/recommendations; no account mutation is permitted.
 ## Decision Logic
-Prioritize proven high-intent demand before speculative expansion unless the stated objective is explicitly demand generation.
-
+Prioritize proven high-intent demand before speculative expansion unless the stated objective is demand generation. Avoid segmentation that creates thin data without a control/reporting reason.
 ## Output Contract
 - Strategy objective
-- Demand/intent map
+- Intent map
 - Campaign portfolio
-- Budget allocation logic
+- Budget/bidding logic
 - Measurement requirements
+- Risks/assumptions
 - Test roadmap
-- Risks and assumptions
-
+## Confidence
+High when objective, economics, and measurement are explicit; otherwise Medium/Low.
 ## Safety
-Strategy only; implementation changes require approval.
-
+Planning only. Campaign creation or changes require human approval.
 ## Related Skills
-campaign-structure, keyword-research, audience-strategy, budget-optimization
+`campaign-structure`, `keyword-research`, `audience-strategy`, `bidding-strategy`, `budget-optimization`, `conversion-tracking`
+## Examples
+Never invent demand, competitor behavior, or benchmarks without evidence.
