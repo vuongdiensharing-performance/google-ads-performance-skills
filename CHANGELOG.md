@@ -6,9 +6,12 @@
 
 - Added mandatory `knowledge_dependencies` to the canonical Rule schema in `docs/RULE_SPEC.md`.
 - Added exact Rule → Knowledge declarations to all 21 active V1 Rules referenced by the Skill Registry.
-- Added `rules/registry.yaml` as the machine-readable `rule-knowledge-provenance/v1` registry.
+- Declared each Rule's local `knowledge_dependencies` as the authoritative source of truth for Rule → Knowledge provenance.
+- Defined `rules/registry.yaml` as a machine-readable index and cross-check, not an alternative source of truth.
+- Upgraded `rules/registry.yaml` to `rule-knowledge-provenance/v1` version `1.0.1` with explicit source-of-truth and registry-role metadata.
 - Upgraded `skills/registry.yaml` to `2.1.0` and linked it to `rules/registry.yaml` via `rule_provenance_registry`.
-- Extended `scripts/validate_skills.py` to validate Rule file ↔ Rule Registry ↔ Knowledge paths and Skill Rule dependencies ↔ Rule Registry membership.
+- Extended `scripts/validate_skills.py` to validate Rule-local declarations first, then enforce exact Rule file ↔ Rule Registry consistency and Knowledge path existence.
+- Added duplicate Rule ID detection and explicit validation of the Rule Registry contract.
 - Added a hard no-inference policy for Rule → Knowledge resolution.
 
 ### Traceability contract
@@ -27,7 +30,7 @@ Knowledge
 Skill
 ```
 
-Rule → Knowledge links are exact repository-relative paths and are no longer inferred from Rule category, filename, directory, or related Skill.
+Rule → Knowledge links are exact repository-relative paths declared on the Rule itself and are no longer inferred from Rule category, filename, directory, related Skill, or semantic similarity. The Registry mirrors those declarations for deterministic machine-readable lookup and cross-checking.
 
 ## 2026-08-11 — Phase 6 Gate 2 Preparation
 
