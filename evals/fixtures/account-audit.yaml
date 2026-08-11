@@ -1,0 +1,36 @@
+skill: account-audit
+cases:
+  - id: account-audit-pass
+    class: PASS
+    context:
+      campaign_count: 3
+      conversion_tracking: valid
+      primary_goal: qualified_lead
+      fragmented_campaigns: false
+    expected:
+      status: pass
+      approval_required: false
+  - id: account-audit-fail
+    class: FAIL
+    context:
+      campaign_count: 28
+      conversion_tracking: broken
+      primary_goal: micro_conversion
+    expected:
+      status: fail
+      required_findings: [tracking-integrity-risk, fragmentation-risk, primary-micro-conversion]
+  - id: account-audit-insufficient-evidence
+    class: INSUFFICIENT_EVIDENCE
+    context:
+      campaign_count: 8
+      conversion_tracking: unknown
+    expected:
+      status: insufficient_evidence
+  - id: account-audit-false-positive
+    class: FALSE_POSITIVE
+    context:
+      campaign_count: 12
+      fragmentation_reason: deliberate_geo_and_product_segmentation
+      conversion_tracking: valid
+    expected:
+      excluded_findings: [fragmentation-risk]
