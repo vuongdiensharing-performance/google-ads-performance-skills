@@ -1,9 +1,15 @@
 ---
 name: landing-page-audit
-version: 1.1.1
+version: 1.2.0
 description: Audit landing pages for message match, relevance, trust, usability, conversion friction, and measurement readiness.
 category: conversion
 status: core
+knowledge_dependencies:
+  - knowledge/ads/rsa-message-match.md
+  - knowledge/measurement/conversion-framework.md
+rule_dependencies:
+  - rules/ad/message-match-gap.yaml
+  - rules/conversion/tracking-integrity-risk.yaml
 ---
 # Landing Page Audit
 ## Purpose
