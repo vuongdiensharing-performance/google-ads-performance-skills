@@ -1,39 +1,54 @@
 ---
 name: quality-score
-version: 1.0.0
-description: Diagnose Quality Score and its component signals to identify relevance and experience improvement opportunities.
+version: 1.1.0
+description: Diagnose Quality Score and component signals as relevance diagnostics while protecting qualified business outcomes.
 category: optimization
 status: core
 ---
-
 # Quality Score
-
 ## Purpose
-Interpret Quality Score as a diagnostic signal rather than a standalone business KPI.
-
+Use Quality Score/components to identify relevance and experience hypotheses, not as a standalone business KPI.
 ## Use When
-- Quality Score or component metrics are under review.
-- Search efficiency issues may relate to relevance or landing-page experience.
-
+- Quality Score or components are under review.
+- Search efficiency may relate to relevance or landing-page experience.
+## Do Not Use When
+- The user has no keyword/component evidence; request it rather than infer.
 ## Required Inputs
-Keyword-level Quality Score/components where available, ad relevance, landing-page experience, CTR/context, and performance data.
-
+Keyword-level Quality Score/components where available, ad relevance, expected CTR/context, landing-page experience, performance data.
+## Preconditions
+Segment by meaningful theme and confirm the business KPI being protected.
+## Knowledge Dependencies
+- `knowledge/keyword/match-types.md`
+- `knowledge/ads/rsa-message-match.md`
+- `knowledge/analytics/performance-diagnosis.md`
+## Rule Dependencies
+- `rules/keyword/low-quality-score-investigation.yaml`
+- `rules/ad/message-match-gap.yaml`
 ## Workflow
-1. Segment by meaningful keyword/theme groups.
-2. Review expected CTR, ad relevance, and landing-page experience signals.
-3. Separate diagnostic symptoms from business outcomes.
-4. Identify root-cause hypotheses.
-5. Recommend ad/keyword/landing-page tests.
-
+1. Validate component evidence.
+2. Segment keywords/themes.
+3. Run Quality Score/message-match Rules.
+4. Separate diagnostic symptoms from business outcomes.
+5. Form root-cause hypotheses.
+6. Recommend controlled ad/keyword/landing-page tests.
+7. Define measurement beyond Quality Score.
+## Rule Engine Contract
+Rule matches are diagnostic leads; the Skill must connect them to CTR, qualified conversions, CPA/ROAS, or other business evidence before prioritization.
+## Decision Logic
+Do not optimize Quality Score at the expense of qualified conversions, revenue, or useful query coverage.
 ## Output Contract
 - Component diagnosis
+- Rule findings
 - Root-cause hypotheses
 - Evidence
 - Recommended tests
-- Expected measurement
-
+- Business KPI measurement
+- Confidence
+## Confidence
+High for directly reported component data; Medium/Low for inferred causes.
 ## Safety
-Do not optimize Quality Score at the expense of qualified conversions or revenue.
-
+No account changes without approval.
 ## Related Skills
-keyword-research, ad-copy, landing-page-audit, performance-diagnosis
+`keyword-research`, `ad-copy`, `landing-page-audit`, `performance-diagnosis`
+## Examples
+Never claim that improving Quality Score will produce a specific CPA/ROAS change without evidence.
