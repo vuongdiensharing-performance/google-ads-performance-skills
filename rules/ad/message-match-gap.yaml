@@ -1,0 +1,34 @@
+id: AD-MATCH-001
+name: Ad Message Match Gap
+version: 1.0.0
+category: ad
+description: Flag a mismatch between dominant search intent and the ad promise or offer language.
+when:
+  all:
+    - search_intent_validated == true
+    - ad_message_alignment == mismatch
+exclude_when:
+  - intent_sample_is_insufficient == true
+severity:
+  level: medium
+confidence:
+  level: medium
+evidence_required:
+  - search_terms_or_keyword_theme
+  - ad_assets
+  - offer_description
+finding:
+  title: Ad messaging does not closely reflect the dominant intent
+recommendation:
+  - rewrite_headlines_and_descriptions
+  - align_landing_page_promise
+impact:
+  dimension: conversion
+  level: medium
+action:
+  type: recommend
+human_approval_required: true
+related_skills:
+  - ad-copy
+  - landing-page-audit
+  - search-term-analysis
