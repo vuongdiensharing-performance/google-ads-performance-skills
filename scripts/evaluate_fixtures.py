@@ -6,6 +6,12 @@ from pathlib import Path
 import yaml
 
 CLASSES = {"PASS", "FAIL", "INSUFFICIENT_EVIDENCE", "FALSE_POSITIVE"}
+DEFAULT_STATUS = {
+    "PASS": "pass",
+    "FAIL": "fail",
+    "INSUFFICIENT_EVIDENCE": "insufficient_evidence",
+    "FALSE_POSITIVE": "no_finding",
+}
 
 
 def load(path: Path):
@@ -14,22 +20,28 @@ def load(path: Path):
 
 
 def evaluate_fixture(case):
-    expected = case.get("expected", {})
-    if case.get("class") not in CLASSES:
+    klass = case.get("class")
+    if klass not in CLASSES:
         return False, "invalid class"
-    expected_status = expected.get("status")
-    if expected_status is None:
-        expected_status = {
-            "PASS": "pass",
-            "FAIL": "fail",
-            "INSUFFICIENT_EVIDENCE": "insufficient_evidence",
-            "FALSE_POSITIVE": "no_finding",
-        }[case["class"]]
-    # Fixture contract validation is deterministic. Runtime execution is a separate adapter.
-    if case["class"] == "INSUFFICIENT_EVIDENCE" and expected_status != "insufficient_evidence":
+
+    expected = case.get("expected", {})
+    # Compact Core Skill fixtures use `expected: pass`; detailed fixtures use
+    # `expected: {status: pass, ...}`. Normalize both forms to one contract.
+    if isinstance(expected, str):
+        expected_status = expected
+    elif isinstance(expected, dict):
+        expected_status = expected.get("status", DEFAULT_STATUS[klass])
+    else:
+        return False, "invalid expected contract"
+
+    if klass == "INSUFFICIENT_EVIDENCE" and expected_status != "insufficient_evidence":
         return False, "evidence-gating contract mismatch"
-    if case["class"] == "FALSE_POSITIVE" and expected_status != "no_finding":
+    if klass == "FALSE_POSITIVE" and expected_status != "no_finding":
         return False, "false-positive contract mismatch"
+    if klass == "PASS" and expected_status != "pass":
+        return False, "pass contract mismatch"
+    if klass == "FAIL" and expected_status != "fail":
+        return False, "fail contract mismatch"
     return True, expected_status
 
 
