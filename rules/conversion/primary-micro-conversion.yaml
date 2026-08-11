@@ -1,6 +1,6 @@
 id: CV-PRIMARY-001
 name: Micro Conversion Used as Primary
-version: 1.0.0
+version: 1.0.1
 category: conversion
 description: Flag a low-business-value micro conversion configured as a primary bidding signal when a stronger business outcome exists.
 when:
@@ -34,3 +34,6 @@ related_skills:
   - conversion-tracking
   - bidding-strategy
   - account-audit
+knowledge_dependencies:
+  - knowledge/measurement/conversion-framework.md
+  - knowledge/bidding/bidding-principles.md
