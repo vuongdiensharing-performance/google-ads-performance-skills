@@ -1,9 +1,10 @@
-version: 1.0.0
+version: 1.0.1
 schema: rule-knowledge-provenance/v1
 dependency_policy:
   knowledge: exact_repository_paths
   no_inference: true
-  source_of_truth: each_rule_and_this_registry
+  source_of_truth: each_rule
+  registry_role: machine_readable_index_and_cross_check
 rules:
   - id: STR-FRAG-001
     path: rules/structure/fragmentation-risk.yaml
