@@ -1,0 +1,38 @@
+id: PMAX-CV-001
+name: PMax optimized to an unsuitable conversion goal
+version: 1.0.0
+category: pmax
+description: Flag Performance Max when the campaign's primary optimization goal does not match the declared business outcome.
+when:
+  all:
+    - campaign.type == performance_max
+    - evidence.primary_goal_matches_business_outcome == false
+exclude_when:
+  - evidence.business_outcome_definition_missing == true
+evidence_required:
+  - campaign_type
+  - primary_conversion_goal
+  - business_outcome_definition
+severity:
+  level: critical
+confidence:
+  level: high
+finding:
+  title: PMax optimization goal does not match the stated business outcome
+recommendation:
+  - review_primary_conversion_goal
+  - verify_primary_secondary_configuration
+  - validate_downstream_conversion_quality
+impact:
+  dimensions:
+    - measurement_risk
+    - conversion
+    - efficiency
+  level: high
+action:
+  type: investigate
+human_approval_required: false
+related_skills:
+  - pmax-optimization
+  - conversion-tracking
+  - performance-diagnosis
