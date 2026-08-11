@@ -1,6 +1,6 @@
 id: AD-PIN-001
 name: Excessive RSA Pinning
-version: 1.0.0
+version: 1.0.1
 category: ad
 description: Flag heavy RSA pinning when there is no documented messaging requirement that justifies reduced asset combinations.
 when:
@@ -32,3 +32,5 @@ human_approval_required: true
 related_skills:
   - ad-copy
   - performance-diagnosis
+knowledge_dependencies:
+  - knowledge/ads/rsa-message-match.md
