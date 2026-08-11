@@ -13,6 +13,14 @@ import yaml
 
 MUTATING_ACTIONS = {"pause", "increase", "decrease", "change"}
 EXPRESSION_RE = re.compile(r"^\s*(?P<path>[A-Za-z0-9_.-]+)\s*(?P<op>==|!=|>=|<=|>|<|\bin\b|\bnot in\b)\s*(?P<value>.+?)\s*$")
+BOUNDARY_DECISIONS = {
+    "APPLICABLE_VALID": "PASS",
+    "APPLICABLE_TRIGGERED": "FAIL",
+    "APPLICABLE_MISSING_EVIDENCE": "INSUFFICIENT_EVIDENCE",
+    "NOT_APPLICABLE": "NOT_APPLICABLE",
+    "CONFLICTING_EVIDENCE": "POLICY_DEFINED",
+    "EXPLICIT_EXCLUSION": "SUPPRESSED",
+}
 
 
 def get_path(data: Any, path: str) -> tuple[bool, Any]:
@@ -146,50 +154,98 @@ def evaluate_exclusions(exclusions: Any, context: dict[str, Any]) -> bool:
     return bool(exclusions) and any(evaluate_condition(item, context) for item in exclusions)
 
 
-def load_rules(rule_dir: Path) -> list[dict[str, Any]]:
-    rules = []
-    for path in sorted(rule_dir.rglob("*.yaml")):
-        with path.open("r", encoding="utf-8") as handle:
-            rule = yaml.safe_load(handle) or {}
-        rule["_source"] = str(path)
-        rules.append(rule)
-    return rules
+def _boundary_state(rule: dict[str, Any], context: dict[str, Any]) -> dict[str, Any]:
+    """Resolve the explicit A-F Boundary Contract without model inference."""
+    contract = rule.get("boundary_contract")
+    if not isinstance(contract, dict):
+        raise ValueError(f"Rule {rule.get('id')} has no boundary_contract")
+
+    applicable = evaluate_condition({"all": contract.get("applicable_when", [])}, context)
+    if not applicable:
+        state = "NOT_APPLICABLE"
+        evidence_sufficient = True
+    else:
+        required = contract.get("evidence_required", rule.get("evidence_required", []))
+        missing = [item for item in required if not evidence_available(item, context)]
+        if missing:
+            state = "APPLICABLE_MISSING_EVIDENCE"
+            evidence_sufficient = False
+        elif evaluate_condition((contract.get("conflict_policy") or {}).get("when"), context):
+            state = "CONFLICTING_EVIDENCE"
+            evidence_sufficient = True
+        elif evaluate_exclusions(rule.get("exclude_when"), context):
+            state = "EXPLICIT_EXCLUSION"
+            evidence_sufficient = True
+        elif evaluate_condition(rule.get("when"), context):
+            state = "APPLICABLE_TRIGGERED"
+            evidence_sufficient = True
+        else:
+            state = "APPLICABLE_VALID"
+            evidence_sufficient = True
+
+    policy = (contract.get("conflict_policy") or {}).get("resolution", {})
+    decision = BOUNDARY_DECISIONS[state]
+    if state == "CONFLICTING_EVIDENCE":
+        if policy.get("state") != state:
+            raise ValueError(f"Rule {rule.get('id')} conflict policy must resolve to {state}")
+        decision = policy.get("decision", decision)
+
+    finding_generated = state == "APPLICABLE_TRIGGERED"
+    return {
+        "rule_id": rule.get("id"),
+        "boundary_state": state,
+        "decision": decision,
+        "inference_used": False,
+        "evidence_sufficient": evidence_sufficient,
+        "finding_generated": finding_generated,
+        "audit_trail": {
+            "evidence": context.get("evidence", context),
+            "rule": str(rule.get("_source")),
+            "knowledge": rule.get("knowledge_dependencies", []),
+        },
+    }
 
 
 def evaluate_rule(rule: dict[str, Any], context: dict[str, Any]) -> dict[str, Any]:
+    boundary = _boundary_state(rule, context) if "boundary_contract" in rule else None
     required = rule.get("evidence_required", [])
     missing = [item for item in required if not evidence_available(item, context)]
     if missing:
-        return {"rule_id": rule.get("id"), "status": "insufficient_evidence", "missing_evidence": missing, "source": rule.get("_source")}
-    if evaluate_exclusions(rule.get("exclude_when"), context):
-        return {"rule_id": rule.get("id"), "status": "excluded", "source": rule.get("_source")}
-    if not evaluate_condition(rule.get("when"), context):
-        return {"rule_id": rule.get("id"), "status": "not_matched", "source": rule.get("_source")}
-
-    action_type = (rule.get("action") or {}).get("type", "recommend")
-    approval_required = bool(rule.get("human_approval_required", False)) or action_type in MUTATING_ACTIONS
-    return {
-        "rule_id": rule.get("id"),
-        "status": "matched",
-        "severity": (rule.get("severity") or {}).get("level"),
-        "confidence": (rule.get("confidence") or {}).get("level"),
-        "finding": rule.get("finding", {}),
-        "recommendation": rule.get("recommendation", []),
-        "impact": rule.get("impact", {}),
-        "action": {"type": action_type, "human_approval_required": approval_required},
-        "related_skills": rule.get("related_skills", []),
-        "source": rule.get("_source"),
-    }
+        result = {"rule_id": rule.get("id"), "status": "insufficient_evidence", "missing_evidence": missing, "source": rule.get("_source")}
+    elif evaluate_exclusions(rule.get("exclude_when"), context):
+        result = {"rule_id": rule.get("id"), "status": "excluded", "source": rule.get("_source")}
+    elif not evaluate_condition(rule.get("when"), context):
+        result = {"rule_id": rule.get("id"), "status": "not_matched", "source": rule.get("_source")}
+    else:
+        action_type = (rule.get("action") or {}).get("type", "recommend")
+        approval_required = bool(rule.get("human_approval_required", False)) or action_type in MUTATING_ACTIONS
+        result = {
+            "rule_id": rule.get("id"),
+            "status": "matched",
+            "severity": (rule.get("severity") or {}).get("level"),
+            "confidence": (rule.get("confidence") or {}).get("level"),
+            "finding": rule.get("finding", {}),
+            "recommendation": rule.get("recommendation", []),
+            "impact": rule.get("impact", {}),
+            "action": {"type": action_type, "human_approval_required": approval_required},
+            "related_skills": rule.get("related_skills", []),
+            "source": rule.get("_source"),
+        }
+    if boundary is not None:
+        result["boundary"] = boundary
+    return result
 
 
 def run(rule_dir: Path, context: dict[str, Any]) -> dict[str, Any]:
     results = [evaluate_rule(rule, context) for rule in load_rules(rule_dir)]
+    boundary_results = [r["boundary"] for r in results if "boundary" in r]
     return {
-        "engine_version": "1.0.0",
+        "engine_version": "1.1.0",
         "matched": [r for r in results if r["status"] == "matched"],
         "insufficient_evidence": [r for r in results if r["status"] == "insufficient_evidence"],
         "excluded": [r for r in results if r["status"] == "excluded"],
         "not_matched": [r for r in results if r["status"] == "not_matched"],
+        "boundary": boundary_results,
     }
 
 
