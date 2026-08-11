@@ -9,6 +9,11 @@ when:
 exclude_when:
   - budget_or_bidding_control_requires_separation == true
   - geography_or_business_unit_requires_separation == true
+  - separation_reason:
+      in:
+        - distinct_location_budgets
+        - distinct_business_units
+        - multi_region_compliance
 severity:
   level: medium
 confidence:
@@ -45,18 +50,12 @@ boundary_contract:
     - volume_or_conversion_density
     - separation_reason
   states:
-    A:
-      state: APPLICABLE_VALID
-    B:
-      state: APPLICABLE_TRIGGERED
-    C:
-      state: APPLICABLE_MISSING_EVIDENCE
-    D:
-      state: NOT_APPLICABLE
-    E:
-      state: CONFLICTING_EVIDENCE
-    F:
-      state: EXPLICIT_EXCLUSION
+    A: {state: APPLICABLE_VALID}
+    B: {state: APPLICABLE_TRIGGERED}
+    C: {state: APPLICABLE_MISSING_EVIDENCE}
+    D: {state: NOT_APPLICABLE}
+    E: {state: CONFLICTING_EVIDENCE}
+    F: {state: EXPLICIT_EXCLUSION}
   conflict_policy:
     enabled: true
     when:

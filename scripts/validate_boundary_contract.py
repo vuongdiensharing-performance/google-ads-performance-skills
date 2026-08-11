@@ -19,15 +19,6 @@ VALID_STATES = {
     "EXPLICIT_EXCLUSION",
 }
 STATE_KEYS = {"A", "B", "C", "D", "E", "F"}
-PRECEDENCE = [
-    "NOT_APPLICABLE",
-    "APPLICABLE_MISSING_EVIDENCE",
-    "CONFLICTING_EVIDENCE",
-    "EXPLICIT_EXCLUSION",
-    "APPLICABLE_TRIGGERED",
-    "APPLICABLE_VALID",
-]
-REQUIRED_FIELDS = {"applicable_when", "evidence_required", "states"}
 EXPECTED_STATE_IDS = {
     "A": "APPLICABLE_VALID",
     "B": "APPLICABLE_TRIGGERED",
@@ -36,6 +27,7 @@ EXPECTED_STATE_IDS = {
     "E": "CONFLICTING_EVIDENCE",
     "F": "EXPLICIT_EXCLUSION",
 }
+REQUIRED_FIELDS = {"applicable_when", "evidence_required", "states", "conflict_policy"}
 
 
 def load_yaml(path: Path) -> dict[str, Any]:
@@ -47,6 +39,7 @@ def load_yaml(path: Path) -> dict[str, Any]:
 
 def validate_rule(rule_path: Path, registry: dict[str, Any]) -> list[str]:
     errors: list[str] = []
+    rule_path = rule_path.resolve()
     try:
         rule = load_yaml(rule_path)
     except Exception as exc:
@@ -92,11 +85,12 @@ def validate_rule(rule_path: Path, registry: dict[str, Any]) -> list[str]:
                 errors.append("conflict policy must resolve to CONFLICTING_EVIDENCE")
             if resolution.get("inference_used") is not False:
                 errors.append("conflict policy must set inference_used: false")
+            if resolution.get("decision") not in {"FAIL", "PASS", "SUPPRESSED", "NOT_APPLICABLE", "INSUFFICIENT_EVIDENCE", "POLICY_DEFINED"}:
+                errors.append("conflict policy has invalid decision")
         if not isinstance(conflict.get("when"), dict):
             errors.append("conflict_policy.when must be a mapping")
 
-    version = contract.get("version")
-    if version != "1.0.0":
+    if contract.get("version") != "1.0.0":
         errors.append("unsupported boundary_contract.version; expected 1.0.0")
 
     rule_id = rule.get("id")
@@ -121,11 +115,12 @@ def main() -> int:
     parser.add_argument("--rule-ids", nargs="*", default=[])
     args = parser.parse_args()
 
-    registry = load_yaml(args.registry)
+    registry = load_yaml(args.registry.resolve())
     failures = 0
-    candidates = sorted(args.rules.rglob("*.yaml"))
+    candidates = sorted(args.rules.resolve().rglob("*.yaml"))
     if args.rule_ids:
-        candidates = [p for p in candidates if load_yaml(p).get("id") in set(args.rule_ids)]
+        requested = set(args.rule_ids)
+        candidates = [p for p in candidates if load_yaml(p).get("id") in requested]
 
     for path in candidates:
         errors = validate_rule(path, registry)
