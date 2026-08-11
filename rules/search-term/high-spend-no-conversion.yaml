@@ -1,0 +1,40 @@
+id: ST-SPEND-001
+name: High spend without conversion evidence
+version: 1.0.0
+category: search_term
+description: Flag a search term for investigation when spend is materially above the configured evidence threshold and no conversion has been observed in the selected lookback window.
+when:
+  all:
+    - search_term.conversions == 0
+    - evidence.spend_threshold_met == true
+    - evidence.minimum_lookback_met == true
+exclude_when:
+  - evidence.conversion_lag_active == true
+  - evidence.tracking_quality_unknown == true
+evidence_required:
+  - search_term_spend
+  - search_term_conversions
+  - lookback_window
+  - spend_threshold_rationale
+severity:
+  level: medium
+confidence:
+  level: medium
+finding:
+  title: Search term has meaningful spend without observed conversions
+recommendation:
+  - inspect_query_intent
+  - inspect_landing_page_and_offer
+  - assess_negative_candidate_only_after_context_review
+impact:
+  dimensions:
+    - wasted_spend
+    - efficiency
+  level: medium
+action:
+  type: investigate
+human_approval_required: false
+related_skills:
+  - search-term-analysis
+  - performance-diagnosis
+  - landing-page-audit
