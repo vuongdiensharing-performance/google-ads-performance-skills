@@ -1,6 +1,6 @@
 id: KW-QS-001
 name: Low Quality Score Investigation
-version: 1.0.0
+version: 1.0.1
 category: keyword
 description: Flag low Quality Score as an investigation trigger, never as an automatic pause signal.
 when:
@@ -34,3 +34,6 @@ related_skills:
   - quality-score
   - ad-copy
   - landing-page-audit
+knowledge_dependencies:
+  - knowledge/ads/rsa-message-match.md
+  - knowledge/analytics/performance-diagnosis.md
