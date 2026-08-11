@@ -1,6 +1,6 @@
 id: PMAX-GOAL-001
 name: PMax Primary Conversion Goal Risk
-version: 1.0.0
+version: 1.0.1
 category: pmax
 description: Flag PMax when the active primary conversion goal is missing, invalid, or not aligned with the campaign objective.
 when:
@@ -31,3 +31,6 @@ human_approval_required: true
 related_skills:
   - pmax-optimization
   - conversion-tracking
+knowledge_dependencies:
+  - knowledge/pmax/pmax-principles.md
+  - knowledge/measurement/conversion-framework.md
