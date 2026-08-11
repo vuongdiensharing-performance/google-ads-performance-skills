@@ -1,0 +1,21 @@
+{
+  "match_type": "broad",
+  "bidding_strategy": "manual_cpc",
+  "keyword": {"match_type": "broad"},
+  "campaign": {"bidding_strategy": "manual_cpc", "type": "search"},
+  "evidence": {
+    "primary_conversion_expected": true,
+    "tracking_status": "healthy",
+    "tracking_quality_unknown": false,
+    "minimum_lookback_met": true,
+    "conversion_lag_active": false,
+    "query_intent_available": true,
+    "ad_promise_available": true,
+    "landing_page_offer_available": true,
+    "message_match_status": "matched",
+    "spend_threshold_met": true,
+    "sample_size_insufficient": false,
+    "required_fields_missing": false,
+    "business_context_available": true
+  }
+}
