@@ -1,54 +1,58 @@
 ---
 name: keyword-research
-version: 1.0.0
+version: 1.1.0
 description: Research and organize Google Ads keywords by intent, theme, match strategy, opportunity, and exclusions.
 category: acquisition
 status: core
 ---
-
 # Keyword Research
-
 ## Purpose
-Turn business/product language and available demand signals into an intent-led keyword set.
-
+Turn business/product language and demand signals into an intent-led, testable keyword set.
 ## Use When
-- Building Search keyword coverage.
+- Building Search coverage.
 - Expanding proven themes.
 - Reworking keyword architecture.
-
+## Do Not Use When
+- Existing search-term evidence is the primary input; use `search-term-analysis`.
 ## Required Inputs
-- Offer/product/service context.
-- Seed terms or landing pages.
-- Target geography and language.
-
+Offer/product/service context, seed terms or landing pages, geography, language.
 ## Optional Inputs
-Search terms, competitor signals, Keyword Planner exports, CRM outcomes.
-
+Search terms, competitor evidence, Keyword Planner exports, CRM outcomes.
+## Preconditions
+Define business-relevant intent classes and exclusion criteria before expansion.
 ## Knowledge Dependencies
-- Keyword intent
-- Match types
-- Negative keywords
-- Intent framework
-
+- `knowledge/keyword/keyword-intent.md`
+- `knowledge/keyword/match-types.md`
+- `knowledge/strategy/intent-framework.md`
+## Rule Dependencies
+- `rules/keyword/intent-theme-mismatch.yaml`
+- `rules/bidding/broad-without-smart-bidding.yaml`
 ## Workflow
 1. Build seed themes.
-2. Expand semantic and problem-aware variants.
+2. Expand semantic/problem-aware variants.
 3. Classify intent.
 4. Deduplicate and normalize.
-5. Map themes to campaigns/ad groups.
+5. Map themes to campaign/ad-group boundaries.
 6. Recommend match strategy.
-7. Generate initial negative candidates.
-
+7. Run intent/match Rules.
+8. Generate negative candidates and gaps.
+## Rule Engine Contract
+Evaluate keyword candidates against normalized `keyword_context`; Rules provide flags and recommendations, never automatic additions.
+## Decision Logic
+Intent relevance precedes search volume. Match type is a control choice, not a proxy for keyword quality. Do not reject a theme solely because volume is unknown.
 ## Output Contract
 - Keyword clusters
 - Intent classification
-- Match-type recommendation
-- Ad-group mapping
+- Match recommendation
+- Campaign/ad-group mapping
+- Rule findings
 - Negative candidates
-- Gaps and assumptions
-
+- Gaps/assumptions
+## Confidence
+High for terms supported by direct business/search evidence; Medium for semantic expansion; Low for speculative themes.
 ## Safety
-Research/recommendation only by default.
-
+Research/recommendation only. Keyword changes require approval.
 ## Related Skills
-campaign-structure, search-term-analysis, negative-keyword-mining, ad-copy
+`campaign-structure`, `search-term-analysis`, `negative-keyword-mining`, `ad-copy`, `bidding-strategy`
+## Examples
+Clearly label generated ideas versus evidence-backed keywords.
