@@ -1,6 +1,6 @@
 id: STR-INTENT-001
 name: Mixed Intent Campaign
-version: 1.0.0
+version: 1.0.1
 category: structure
 description: Flag a campaign that mixes materially different intent tiers while requiring different budgets, messaging, or evaluation criteria.
 when:
@@ -31,3 +31,6 @@ human_approval_required: true
 related_skills:
   - campaign-structure
   - campaign-strategy
+knowledge_dependencies:
+  - knowledge/structure/account-structure.md
+  - knowledge/strategy/intent-framework.md
