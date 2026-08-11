@@ -1,9 +1,16 @@
 ---
 name: campaign-structure
-version: 1.1.0
+version: 1.2.0
 description: Design or review Google Ads campaign and ad-group structure for intent separation, budget control, learning, and reporting clarity.
 category: strategy
 status: core
+knowledge_dependencies:
+  - knowledge/structure/account-structure.md
+  - knowledge/strategy/intent-framework.md
+  - knowledge/keyword/keyword-intent.md
+rule_dependencies:
+  - rules/structure/fragmentation-risk.yaml
+  - rules/structure/mixed-intent-campaign.yaml
 ---
 # Campaign Structure
 ## Purpose
