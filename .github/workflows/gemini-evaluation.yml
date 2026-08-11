@@ -1,0 +1,36 @@
+name: Gemini Evaluation
+
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: "Gemini model to benchmark"
+        required: false
+        default: "gemini-2.5-flash"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  account-audit:
+    runs-on: ubuntu-latest
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GEMINI_MODEL: ${{ inputs.model }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --upgrade pip
+      - run: pip install -r scripts/requirements.txt
+      - run: pip install -r evals/gemini/requirements.txt
+      - run: mkdir -p reports
+      - run: python scripts/evaluate_gemini_account_audit.py --mode gemini --model "$GEMINI_MODEL" --json-out reports/account-audit-gemini.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: account-audit-gemini-report
+          path: reports/account-audit-gemini.json
+          if-no-files-found: ignore
