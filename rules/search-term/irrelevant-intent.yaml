@@ -1,0 +1,33 @@
+id: ST-IRRELEVANT-001
+name: Irrelevant Search Intent
+version: 1.0.0
+category: search_term
+description: Flag search terms whose intent is clearly outside the advertised offer.
+when:
+  all:
+    - search_term.intent_alignment == irrelevant
+    - evidence.business_context_available == true
+exclude_when:
+  - search_term.has_clear_business_relevance == true
+severity:
+  level: high
+confidence:
+  level: high
+evidence_required:
+  - search_term
+  - campaign_or_ad_group_context
+  - offer_description
+finding:
+  title: Search term is outside the intended demand space
+recommendation:
+  - review_as_negative_candidate
+  - check_for_pattern_level_exclusion
+impact:
+  dimension: wasted_spend
+  level: high
+action:
+  type: recommend
+human_approval_required: true
+related_skills:
+  - search-term-analysis
+  - negative-keyword-mining
