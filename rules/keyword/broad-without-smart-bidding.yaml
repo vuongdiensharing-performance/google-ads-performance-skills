@@ -1,0 +1,39 @@
+id: KW-BROAD-001
+name: Broad Match Without Conversion-Based Smart Bidding
+version: 1.0.0
+category: keyword
+description: Flag broad-match usage when the campaign is not using a conversion-oriented Smart Bidding strategy, subject to current platform behavior and campaign context.
+when:
+  all:
+    - match_type == broad
+    - bidding_strategy.not_in:
+        - maximize_conversions
+        - target_cpa
+        - maximize_conversion_value
+        - target_roas
+exclude_when:
+  - campaign_type != search
+  - current_google_behavior_differs == true
+severity:
+  level: high
+confidence:
+  level: high
+evidence_required:
+  - match_type
+  - bidding_strategy
+  - campaign_type
+finding:
+  title: Broad match is paired with a non-conversion-oriented bidding setup
+recommendation:
+  - review_bidding_strategy
+  - review_conversion_tracking_and_primary_goals
+impact:
+  dimension: efficiency
+  level: high
+action:
+  type: investigate
+human_approval_required: true
+related_skills:
+  - keyword-research
+  - bidding-strategy
+  - conversion-tracking
