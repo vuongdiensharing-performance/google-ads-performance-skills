@@ -1,6 +1,6 @@
 id: PMAX-NEG-001
 name: Overrestrictive PMax Negative Keywords
-version: 1.0.0
+version: 1.0.1
 category: pmax
 description: Flag broad or extensive negative-keyword exclusions in PMax when they may block valuable demand without a clear safety or irrelevance justification.
 when:
@@ -33,3 +33,6 @@ human_approval_required: true
 related_skills:
   - pmax-optimization
   - search-term-analysis
+knowledge_dependencies:
+  - knowledge/pmax/pmax-principles.md
+  - knowledge/search/search-term-methodology.md
