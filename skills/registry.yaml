@@ -1,0 +1,110 @@
+version: 1.1.0
+skills:
+  - id: S01
+    name: account-audit
+    category: audit
+    role: orchestrator
+    knowledge: [account-structure, intent-framework, bidding-principles, conversion-framework, performance-diagnosis]
+    rules: [structure, bidding, search-term, conversion, budget, ad, pmax]
+  - id: S02
+    name: campaign-strategy
+    category: strategy
+    role: planner
+    knowledge: [intent-framework, funnel-strategy, account-structure, bidding-principles]
+    rules: [mixed-intent-campaign, fragmentation-risk]
+  - id: S03
+    name: campaign-structure
+    category: strategy
+    role: architect
+    knowledge: [account-structure, intent-framework, keyword-intent]
+    rules: [fragmentation-risk, mixed-intent-campaign]
+  - id: S04
+    name: keyword-research
+    category: acquisition
+    role: researcher
+    knowledge: [keyword-intent, match-types, intent-framework]
+    rules: [intent-theme-mismatch, broad-without-smart-bidding]
+  - id: S05
+    name: search-term-analysis
+    category: analytics
+    role: diagnostician
+    knowledge: [search-term-methodology, keyword-intent, conversion-framework]
+    rules: [irrelevant-intent, high-spend-zero-conversion, expansion-candidate]
+  - id: S06
+    name: negative-keyword-mining
+    category: acquisition
+    role: action-preparer
+    knowledge: [keyword-intent, match-types, search-term-methodology]
+    rules: [irrelevant-intent, high-spend-zero-conversion]
+  - id: S07
+    name: quality-score
+    category: optimization
+    role: diagnostician
+    knowledge: [match-types, rsa-message-match, performance-diagnosis]
+    rules: [low-quality-score-investigation, message-match-gap]
+  - id: S08
+    name: ad-copy
+    category: creative
+    role: generator
+    knowledge: [rsa-message-match, keyword-intent]
+    rules: [excessive-pinning, message-match-gap]
+  - id: S09
+    name: landing-page-audit
+    category: conversion
+    role: auditor
+    knowledge: [rsa-message-match, conversion-framework]
+    rules: [message-match-gap, tracking-integrity-risk]
+  - id: S10
+    name: bidding-strategy
+    category: optimization
+    role: optimizer
+    knowledge: [bidding-principles, conversion-framework, performance-diagnosis]
+    rules: [objective-strategy-mismatch, frequent-target-changes, conversion-signal-risk, broad-without-smart-bidding]
+  - id: S11
+    name: budget-optimization
+    category: optimization
+    role: optimizer
+    knowledge: [bidding-principles, performance-diagnosis]
+    rules: [budget-constraint-opportunity, scale-with-quality-risk]
+  - id: S12
+    name: pmax-optimization
+    category: campaign-type
+    role: specialist
+    knowledge: [pmax-principles, pmax-b2b, conversion-framework]
+    rules: [primary-goal-missing, recent-change-learning, overrestrictive-negative]
+  - id: S13
+    name: shopping-ads
+    category: campaign-type
+    role: specialist
+    knowledge: [pmax-principles, conversion-framework]
+    rules: [primary-goal-missing, budget-constraint-opportunity]
+  - id: S14
+    name: audience-strategy
+    category: targeting
+    role: strategist
+    knowledge: [intent-framework, conversion-framework]
+    rules: [lead-quality-gap]
+  - id: S15
+    name: remarketing-strategy
+    category: targeting
+    role: strategist
+    knowledge: [intent-framework, conversion-framework]
+    rules: [lead-quality-gap]
+  - id: S16
+    name: competitor-analysis
+    category: strategy
+    role: researcher
+    knowledge: [intent-framework, keyword-intent]
+    rules: [mixed-intent-campaign]
+  - id: S17
+    name: conversion-tracking
+    category: measurement
+    role: measurement-auditor
+    knowledge: [conversion-framework]
+    rules: [primary-micro-conversion, tracking-integrity-risk, lead-quality-gap]
+  - id: S18
+    name: performance-diagnosis
+    category: analytics
+    role: diagnostician
+    knowledge: [performance-diagnosis, conversion-framework, bidding-principles]
+    rules: [high-spend-zero-conversion, conversion-signal-risk, scale-with-quality-risk]
