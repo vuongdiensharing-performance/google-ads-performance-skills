@@ -1,6 +1,6 @@
 id: STR-FRAG-001
 name: Campaign Fragmentation Risk
-version: 1.0.1
+version: 1.0.2
 category: structure
 description: Flag excessive campaign or ad-group fragmentation when a normalized fragmentation-risk signal is present and no valid control or reporting requirement justifies the separation.
 when:
@@ -33,3 +33,5 @@ related_skills:
   - campaign-structure
   - account-audit
   - budget-optimization
+knowledge_dependencies:
+  - knowledge/structure/account-structure.md
