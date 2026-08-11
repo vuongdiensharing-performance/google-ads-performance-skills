@@ -1,4 +1,4 @@
-contract_version: "1.0.0"
+contract_version: "1.1.0"
 evidence_type: GA4_REPORT
 source:
   provider: google_analytics
@@ -17,12 +17,13 @@ request:
     - conversions
   filters: []
 result:
-  rows:
-    - dimensionValues:
-        sessionCampaignName: "Synthetic Campaign"
-      metricValues:
-        sessions: "100"
-        conversions: "4"
+  data:
+    rows:
+      - dimensionValues:
+          sessionCampaignName: "Synthetic Campaign"
+        metricValues:
+          sessions: "100"
+          conversions: "4"
   metadata:
     synthetic: true
   normalized_evidence:
@@ -34,4 +35,4 @@ provenance:
   inference_used: false
   provider_version: "0.7.0"
   provider_commit: "a8ca729d4a8fa99bffe87962c17c0539c6aa9da7"
-  request_fingerprint: "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  request_fingerprint: "sha256:815c4ca5764af8b7b5795f26d5b9897be2422b7ac9a5da66674c27a8c0dfbf41"
