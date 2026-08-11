@@ -113,16 +113,22 @@ class GoogleAnalyticsMCPAdapter:
         return self.call("list_google_ads_links", {"property_id": property_id})
 
     def run_report(self, property_id: str, request: dict[str, Any]) -> dict[str, Any]:
-        return self.call("run_report", {"property_id": property_id, **request})
+        return self.call("run_report", self._scoped_request(property_id, request))
 
     def run_funnel_report(self, property_id: str, request: dict[str, Any]) -> dict[str, Any]:
-        return self.call("run_funnel_report", {"property_id": property_id, **request})
+        return self.call("run_funnel_report", self._scoped_request(property_id, request))
 
     def get_custom_dimensions_and_metrics(self, property_id: str) -> dict[str, Any]:
         return self.call("get_custom_dimensions_and_metrics", {"property_id": property_id})
 
     def run_realtime_report(self, property_id: str, request: dict[str, Any]) -> dict[str, Any]:
-        return self.call("run_realtime_report", {"property_id": property_id, **request})
+        return self.call("run_realtime_report", self._scoped_request(property_id, request))
+
+    @staticmethod
+    def _scoped_request(property_id: str, request: dict[str, Any]) -> dict[str, Any]:
+        if "property_id" in request and request["property_id"] != property_id:
+            raise GA4AdapterError("request.property_id must match the method property_id")
+        return {"property_id": property_id, **request}
 
     @staticmethod
     def _validate_request(tool: str, request: dict[str, Any]) -> None:
