@@ -1,0 +1,88 @@
+# Compact fixture matrix: four canonical cases per Core Skill.
+# Detailed account-audit fixtures live in account-audit.yaml.
+skills:
+  campaign-strategy:
+    PASS: {context: {intent_framework: valid, business_goal: qualified_leads}, expected: pass}
+    FAIL: {context: {business_goal: missing, mixed_intent: true}, expected: fail}
+    INSUFFICIENT_EVIDENCE: {context: {business_goal: unknown}, expected: insufficient_evidence}
+    FALSE_POSITIVE: {context: {mixed_intent: true, deliberate_segmentation: true}, expected: no_finding}
+  campaign-structure:
+    PASS: {context: {intent_themes: aligned, fragmentation: false}, expected: pass}
+    FAIL: {context: {fragmentation: true, no_business_reason: true}, expected: fail}
+    INSUFFICIENT_EVIDENCE: {context: {campaign_purpose: unknown}, expected: insufficient_evidence}
+    FALSE_POSITIVE: {context: {fragmentation: true, justified: true}, expected: no_finding}
+  keyword-research:
+    PASS: {context: {intent_classified: true, themes: aligned}, expected: pass}
+    FAIL: {context: {intent_classified: false, mismatch: true}, expected: fail}
+    INSUFFICIENT_EVIDENCE: {context: {market_data: missing}, expected: insufficient_evidence}
+    FALSE_POSITIVE: {context: {broad_match: true, smart_bidding: true}, expected: no_finding}
+  search-term-analysis:
+    PASS: {context: {relevance: high, spend: 100, conversions: 3}, expected: pass}
+    FAIL: {context: {relevance: low, spend: 500, conversions: 0}, expected: fail}
+    INSUFFICIENT_EVIDENCE: {context: {spend: 10, conversions: 0}, expected: insufficient_evidence}
+    FALSE_POSITIVE: {context: {spend: 500, conversions: 1, conversion_lag: true}, expected: no_finding}
+  negative-keyword-mining:
+    PASS: {context: {irrelevant_terms: [], candidates: 0}, expected: pass}
+    FAIL: {context: {irrelevant_terms: [jobs, free], candidates: 2}, expected: fail}
+    INSUFFICIENT_EVIDENCE: {context: {search_terms: missing}, expected: insufficient_evidence}
+    FALSE_POSITIVE: {context: {term: competitor, business_allows_competitor: true}, expected: no_finding}
+  quality-score:
+    PASS: {context: {quality_score: 8, message_match: strong}, expected: pass}
+    FAIL: {context: {quality_score: 3, message_match: weak}, expected: fail}
+    INSUFFICIENT_EVIDENCE: {context: {quality_score: unknown}, expected: insufficient_evidence}
+    FALSE_POSITIVE: {context: {quality_score: 4, conversion_rate: strong}, expected: no_finding}
+  ad-copy:
+    PASS: {context: {message_match: strong, pinning: limited}, expected: pass}
+    FAIL: {context: {excessive_pinning: true, message_match: weak}, expected: fail}
+    INSUFFICIENT_EVIDENCE: {context: {landing_page: missing}, expected: insufficient_evidence}
+    FALSE_POSITIVE: {context: {pinning: strategic, reason: compliance}, expected: no_finding}
+  landing-page-audit:
+    PASS: {context: {message_match: strong, conversion_tracking: valid}, expected: pass}
+    FAIL: {context: {message_match: weak, tracking: broken}, expected: fail}
+    INSUFFICIENT_EVIDENCE: {context: {landing_page_url: missing}, expected: insufficient_evidence}
+    FALSE_POSITIVE: {context: {tracking: valid, delayed_conversion: true}, expected: no_finding}
+  bidding-strategy:
+    PASS: {context: {objective: qualified_lead, strategy: target_cpa, signal: healthy}, expected: pass}
+    FAIL: {context: {objective: qualified_lead, strategy: clicks, signal: weak}, expected: fail}
+    INSUFFICIENT_EVIDENCE: {context: {conversion_volume: unknown}, expected: insufficient_evidence}
+    FALSE_POSITIVE: {context: {broad_match: true, strategy: target_cpa}, expected: no_finding}
+  budget-optimization:
+    PASS: {context: {budget_limited: false, quality: strong}, expected: pass}
+    FAIL: {context: {budget_limited: true, quality: strong, marginal_opportunity: high}, expected: fail}
+    INSUFFICIENT_EVIDENCE: {context: {budget: unknown}, expected: insufficient_evidence}
+    FALSE_POSITIVE: {context: {budget_limited: true, quality: poor}, expected: no_scale}
+  pmax-optimization:
+    PASS: {context: {primary_goal: qualified_lead, learning: stable}, expected: pass}
+    FAIL: {context: {primary_goal: micro_conversion, recent_change: true}, expected: fail}
+    INSUFFICIENT_EVIDENCE: {context: {goal: unknown}, expected: insufficient_evidence}
+    FALSE_POSITIVE: {context: {recent_change: true, days_since_change: 1}, expected: no_finding}
+  shopping-ads:
+    PASS: {context: {feed_valid: true, primary_goal: revenue}, expected: pass}
+    FAIL: {context: {feed_valid: false, primary_goal: missing}, expected: fail}
+    INSUFFICIENT_EVIDENCE: {context: {feed_status: unknown}, expected: insufficient_evidence}
+    FALSE_POSITIVE: {context: {feed_valid: true, low_volume: true}, expected: no_finding}
+  audience-strategy:
+    PASS: {context: {audience_signal: aligned, lead_quality: strong}, expected: pass}
+    FAIL: {context: {audience_signal: weak, lead_quality: poor}, expected: fail}
+    INSUFFICIENT_EVIDENCE: {context: {lead_quality: unknown}, expected: insufficient_evidence}
+    FALSE_POSITIVE: {context: {lead_quality: poor, crm_sample: too_small}, expected: no_finding}
+  remarketing-strategy:
+    PASS: {context: {audience_size: viable, intent: high}, expected: pass}
+    FAIL: {context: {audience_size: tiny, intent: low}, expected: fail}
+    INSUFFICIENT_EVIDENCE: {context: {audience_size: unknown}, expected: insufficient_evidence}
+    FALSE_POSITIVE: {context: {audience_size: tiny, seasonality: true}, expected: no_finding}
+  competitor-analysis:
+    PASS: {context: {competitor_terms: valid, intent: classified}, expected: pass}
+    FAIL: {context: {competitor_terms: high_spend, conversions: 0}, expected: fail}
+    INSUFFICIENT_EVIDENCE: {context: {competitor_data: missing}, expected: insufficient_evidence}
+    FALSE_POSITIVE: {context: {competitor_terms: high_spend, brand_strategy: intentional}, expected: no_finding}
+  conversion-tracking:
+    PASS: {context: {tracking: valid, primary_goal: qualified_lead}, expected: pass}
+    FAIL: {context: {tracking: broken, primary_goal: micro_conversion}, expected: fail}
+    INSUFFICIENT_EVIDENCE: {context: {tracking_status: unknown}, expected: insufficient_evidence}
+    FALSE_POSITIVE: {context: {micro_conversion: present, primary_goal: qualified_lead}, expected: no_finding}
+  performance-diagnosis:
+    PASS: {context: {spend: 1000, conversions: 20, target_cpa: 60}, expected: pass}
+    FAIL: {context: {spend: 3000, conversions: 2, target_cpa: 60}, expected: fail}
+    INSUFFICIENT_EVIDENCE: {context: {conversion_quality: unknown}, expected: insufficient_evidence}
+    FALSE_POSITIVE: {context: {cpa_high: true, conversion_lag: true}, expected: no_finding}
