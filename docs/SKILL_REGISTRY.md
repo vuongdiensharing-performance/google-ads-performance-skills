@@ -1,57 +1,57 @@
-# Skill Registry v1
+# Skill Registry v1.1
 
-The registry is the canonical map of Core Skills, their purpose, source lineage, and dependencies.
+The registry is the canonical map of Core Skills, their Knowledge and Rule dependencies, and their runtime role. Every Core Skill must follow `docs/SKILL_SPEC.md` and consume the Rule Engine where deterministic checks are applicable.
 
-| ID | Skill | Category | Knowledge | Core Rules | Status |
+| ID | Skill | Category | Knowledge | Core Rules | Runtime role |
 |---|---|---|---|---|---|
-| S01 | account-audit | audit | account-structure, performance-diagnosis | fragmentation-risk, mixed-intent-campaign | core |
-| S02 | campaign-strategy | strategy | intent-framework, account-structure | mixed-intent-campaign | core |
-| S03 | campaign-structure | strategy | account-structure, intent-framework | fragmentation-risk, mixed-intent-campaign | core |
-| S04 | keyword-research | acquisition | keyword-intent, match-types | intent-theme-mismatch, broad-without-smart-bidding | core |
-| S05 | search-term-analysis | analytics | search-term-methodology, keyword-intent | irrelevant-intent, high-spend-zero-conversion, expansion-candidate | core |
-| S06 | negative-keyword-mining | acquisition | search-term-methodology, match-types | irrelevant-intent, high-spend-zero-conversion | core |
-| S07 | quality-score | optimization | match-types, rsa-message-match | low-quality-score-investigation | core |
-| S08 | ad-copy | creative | rsa-message-match, keyword-intent | excessive-pinning, message-match-gap | core |
-| S09 | landing-page-audit | conversion | rsa-message-match, conversion-framework | message-match-gap | core |
-| S10 | bidding-strategy | optimization | bidding-principles, conversion-framework | objective-strategy-mismatch, frequent-target-changes, conversion-signal-risk | core |
-| S11 | budget-optimization | optimization | bidding-principles, performance-diagnosis | budget-constraint-opportunity, scale-with-quality-risk | core |
-| S12 | pmax-optimization | campaign-type | pmax-principles, pmax-b2b, conversion-framework | primary-goal-missing, recent-change-learning, overrestrictive-negative | core |
-| S13 | shopping-ads | campaign-type | pmax-principles, conversion-framework | primary-goal-missing | core |
-| S14 | audience-strategy | targeting | intent-framework, conversion-framework | lead-quality-gap | core |
-| S15 | remarketing-strategy | targeting | intent-framework, conversion-framework | lead-quality-gap | core |
-| S16 | competitor-analysis | strategy | intent-framework, keyword-intent | mixed-intent-campaign | core |
-| S17 | conversion-tracking | measurement | conversion-framework | primary-micro-conversion, tracking-integrity-risk, lead-quality-gap | core |
-| S18 | performance-diagnosis | analytics | performance-diagnosis, conversion-framework, bidding-principles | high-spend-zero-conversion, conversion-signal-risk, scale-with-quality-risk | core |
+| S01 | account-audit | audit | structure, intent, bidding, measurement, diagnosis | structure, bidding, search, conversion, budget, ad/PMax | orchestrator |
+| S02 | campaign-strategy | strategy | intent, funnel, structure, bidding | mixed-intent, fragmentation | planner |
+| S03 | campaign-structure | strategy | structure, intent, keyword | fragmentation, mixed-intent | architect |
+| S04 | keyword-research | acquisition | keyword-intent, match-types, intent | intent-mismatch, broad-without-smart-bidding | researcher |
+| S05 | search-term-analysis | analytics | search-methodology, keyword-intent, conversion | irrelevant-intent, spend-zero-conversion, expansion | diagnostician |
+| S06 | negative-keyword-mining | acquisition | keyword-intent, match-types, search-methodology | irrelevant-intent, spend-zero-conversion | action-preparer |
+| S07 | quality-score | optimization | match-types, message-match, diagnosis | low-quality-score, message-match | diagnostician |
+| S08 | ad-copy | creative | message-match, keyword-intent | pinning, message-match | generator |
+| S09 | landing-page-audit | conversion | message-match, conversion | message-match, tracking-integrity | auditor |
+| S10 | bidding-strategy | optimization | bidding, conversion, diagnosis | objective-mismatch, target-changes, signal-risk, broad-context | optimizer |
+| S11 | budget-optimization | optimization | bidding, diagnosis | budget-opportunity, scale-quality-risk | optimizer |
+| S12 | pmax-optimization | campaign-type | PMax, PMax-B2B, conversion | primary-goal, recent-change, negative-restriction | specialist |
+| S13 | shopping-ads | campaign-type | PMax, conversion | primary-goal, budget-opportunity | specialist |
+| S14 | audience-strategy | targeting | intent, conversion | lead-quality-gap | strategist |
+| S15 | remarketing-strategy | targeting | intent, conversion | lead-quality-gap | strategist |
+| S16 | competitor-analysis | strategy | intent, keyword | mixed-intent | researcher |
+| S17 | conversion-tracking | measurement | conversion | primary-micro-conversion, tracking-integrity, lead-quality | measurement auditor |
+| S18 | performance-diagnosis | analytics | diagnosis, conversion, bidding | spend-zero-conversion, signal-risk, scale-quality-risk | diagnostician |
+
+## Runtime contract
+
+Every Core Skill follows:
+
+`Validate → Load Knowledge → Normalize Context → Run Rules → Classify → Prioritize → Recommend → Measure`
+
+The exact stages may be shortened for generative/planning Skills, but evidence validation, dependency loading, and safety must remain explicit.
+
+## Machine registry
+
+`skills/registry.yaml` mirrors this document for tooling and validation.
 
 ## Knowledge Registry
 
-V1 populated knowledge assets:
-
-- `strategy/intent-framework.md`
-- `structure/account-structure.md`
-- `keyword/keyword-intent.md`
-- `keyword/match-types.md`
-- `bidding/bidding-principles.md`
-- `measurement/conversion-framework.md`
-- `search/search-term-methodology.md`
-- `ads/rsa-message-match.md`
-- `pmax/pmax-principles.md`
-- `pmax/pmax-b2b.md`
-- `analytics/performance-diagnosis.md`
+V1 populated assets include intent, funnel strategy, account structure, keyword intent, match types, bidding principles, conversion framework, search-term methodology, RSA/message match, PMax principles/B2B, and performance diagnosis.
 
 ## Rule Registry
 
-V1 contains 21 reusable rules across search terms, keywords, bidding, conversion, budget, structure, ads, and Performance Max. Rules are evidence-gated and do not execute account changes by default.
+V1 contains reusable evidence-gated Rules across search terms, keywords, bidding, conversion, budget, structure, ads, and Performance Max. Rules return findings; Skills assign business priority.
 
 ## Dependency graph
 
-`account-audit → performance-diagnosis → action plan`
+`account-audit → specialized Skills → rule engine → prioritized action plan`
 
 `campaign-strategy → campaign-structure → keyword-research → ad-copy`
 
 `search-term-analysis → negative-keyword-mining`
 
-`conversion-tracking → performance-diagnosis`
+`conversion-tracking → bidding-strategy → performance-diagnosis`
 
 `bidding-strategy ↔ budget-optimization`
 
@@ -62,8 +62,8 @@ V1 contains 21 reusable rules across search terms, keywords, bidding, conversion
 ## Registry rules
 
 - Every Skill must have a matching directory and `SKILL.md`.
-- A Skill may consume multiple Knowledge and Rule assets.
-- Duplicate source concepts should be merged into one canonical Skill.
+- Every Core Skill must name Knowledge and Rule dependencies.
+- Rule Engine results must not be presented as causality without supporting evidence.
+- Severity and priority remain separate.
 - Source-repository claims are lineage, not authority.
 - Platform facts should point to current first-party documentation where practical.
-- Status values: `draft`, `core`, `experimental`, `deprecated`.
