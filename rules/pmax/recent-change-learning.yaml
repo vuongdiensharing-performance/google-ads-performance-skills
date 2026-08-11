@@ -1,0 +1,34 @@
+id: PMAX-LEARN-001
+name: PMax Recent Change During Learning
+version: 1.0.0
+category: pmax
+description: Flag major PMax optimization changes made before sufficient learning or conversion-lag evidence is available.
+when:
+  all:
+    - campaign_type == performance_max
+    - learning_or_ramp_period == true
+    - major_change_made == true
+exclude_when:
+  - change_was_required_to_fix_tracking_or_policy == true
+severity:
+  level: medium
+confidence:
+  level: high
+evidence_required:
+  - campaign_age_or_learning_status
+  - change_history
+  - conversion_lag
+finding:
+  title: Major changes may be interfering with PMax learning
+recommendation:
+  - stabilize_configuration
+  - wait_for_mature_evidence_before_rejudging_performance
+impact:
+  dimension: efficiency
+  level: medium
+action:
+  type: recommend
+human_approval_required: true
+related_skills:
+  - pmax-optimization
+  - performance-diagnosis
