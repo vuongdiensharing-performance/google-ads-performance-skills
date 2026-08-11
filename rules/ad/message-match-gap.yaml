@@ -1,6 +1,6 @@
 id: AD-MATCH-001
 name: Ad Message Match Gap
-version: 1.0.0
+version: 1.0.1
 category: ad
 description: Flag a mismatch between dominant search intent and the ad promise or offer language.
 when:
@@ -32,3 +32,6 @@ related_skills:
   - ad-copy
   - landing-page-audit
   - search-term-analysis
+knowledge_dependencies:
+  - knowledge/ads/rsa-message-match.md
+  - knowledge/keyword/keyword-intent.md
