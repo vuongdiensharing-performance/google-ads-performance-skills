@@ -15,7 +15,7 @@ JSON Schema validation
     ↓
 query-local semantic validation
     ↓
-canonical request construction
+canonical upstream MCP request
     ↓
 SHA-256 request fingerprint
     ↓
@@ -26,10 +26,10 @@ There is no supported path from an LLM directly to raw `run_report` arguments.
 
 ## Query ownership
 
-- `schemas/ga4-query-contract.json` — canonical request schema.
+- `schemas/ga4-query-contract.json` — canonical Agent-facing request schema.
 - `queries/google_analytics/registry.yaml` — machine-readable query index and execution policy.
 - `queries/google_analytics/*.yaml` — source of truth for each registered query's dimensions, metrics, filters, and output evidence type.
-- `scripts/validate_ga4_query.py` — schema + semantic validation and canonical request/fingerprint construction.
+- `scripts/validate_ga4_query.py` — schema + semantic validation and canonical upstream request/fingerprint construction.
 - `evals/ga4/` — positive and negative fixtures.
 
 ## GA4-CV-001
@@ -52,24 +52,29 @@ allowed_filters:
 
 The Agent supplies only the registered query ID, authorized property, date range, and allowlisted filter values. Dimensions and metrics are resolved from the catalog rather than accepted from the Agent.
 
-## Determinism
+## Canonical request boundary
 
-The adapter receives a canonical request whose fingerprint is calculated from:
+The Agent-facing contract intentionally uses a compact `date_range`. Before MCP execution, the validator resolves that input to the **exact snake_case request shape accepted by the pinned `google-analytics-mcp` provider**:
 
 ```json
 {
   "tool": "run_report",
   "request": {
-    "property_id": "...",
-    "date_range": {"start_date": "...", "end_date": "..."},
-    "dimensions": ["..."],
-    "metrics": ["..."],
-    "filters": {}
+    "property_id": "properties/123456789",
+    "date_ranges": [
+      {"start_date": "2026-08-01", "end_date": "2026-08-10"}
+    ],
+    "dimensions": ["sessionCampaignName"],
+    "metrics": ["sessions", "conversions"]
   }
 }
 ```
 
-Keys are sorted and JSON is encoded with compact separators before SHA-256 hashing. The same logical contract request must therefore produce the same fingerprint.
+If a filter is supplied, the repository shorthand is resolved to the provider's `dimension_filter` structure. The fingerprint is calculated **after** this resolution, so the Query Contract fingerprint and the GA4 Evidence Contract fingerprint refer to the same actual MCP request.
+
+## Determinism
+
+Keys are sorted and JSON is encoded with compact separators before SHA-256 hashing. The same registered query, property, date range, and filter values must therefore produce the same canonical upstream request and fingerprint.
 
 ## Rejection behavior
 
