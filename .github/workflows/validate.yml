@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -12,7 +15,21 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - run: python -m pip install --upgrade pip
       - run: pip install -r scripts/requirements.txt
       - run: python scripts/validate_rules.py --rules rules
       - run: python scripts/validate_skills.py --skills skills --registry skills/registry.yaml
       - run: python scripts/evaluate_fixtures.py --fixtures evals/fixtures
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --upgrade pip
+      - run: pip install -r scripts/requirements.txt
+      - run: pip install pip-audit bandit
+      - run: pip-audit -r scripts/requirements.txt
+      - run: bandit -r scripts -x scripts/test_rule_engine.py,scripts/evaluate_fixtures.py -ll
