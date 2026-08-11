@@ -1,9 +1,14 @@
 ---
 name: audience-strategy
-version: 1.1.0
+version: 1.2.0
 description: Design and evaluate Google Ads audience strategy using intent, first-party signals, observation/targeting mode, and business value.
 category: targeting
 status: core
+knowledge_dependencies:
+  - knowledge/strategy/intent-framework.md
+  - knowledge/measurement/conversion-framework.md
+rule_dependencies:
+  - rules/conversion/lead-quality-gap.yaml
 ---
 # Audience Strategy
 ## Purpose
