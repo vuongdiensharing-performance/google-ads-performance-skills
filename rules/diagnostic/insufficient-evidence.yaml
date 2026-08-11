@@ -1,0 +1,37 @@
+id: DIAG-EVID-001
+name: Insufficient evidence for a strong optimization conclusion
+version: 1.0.0
+category: analytics
+description: Prevent the engine from producing a high-confidence optimization finding when required evidence is missing or materially unreliable.
+when:
+  any:
+    - evidence.required_fields_missing == true
+    - evidence.sample_size_insufficient == true
+    - evidence.tracking_quality_unknown == true
+    - evidence.conversion_lag_active == true
+exclude_when: []
+evidence_required:
+  - evidence_completeness_status
+  - sample_adequacy_status
+  - tracking_quality_status
+severity:
+  level: info
+confidence:
+  level: high
+finding:
+  title: Evidence is insufficient for a strong optimization conclusion
+recommendation:
+  - request_missing_data
+  - extend_lookback_window_if_appropriate
+  - resolve_measurement_issues
+impact:
+  dimensions:
+    - measurement_risk
+  level: high
+action:
+  type: investigate
+human_approval_required: false
+related_skills:
+  - performance-diagnosis
+  - account-audit
+  - conversion-tracking
