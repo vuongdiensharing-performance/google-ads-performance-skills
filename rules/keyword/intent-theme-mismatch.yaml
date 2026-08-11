@@ -1,0 +1,35 @@
+id: KW-INTENT-001
+name: Keyword Intent Theme Mismatch
+version: 1.0.0
+category: keyword
+description: Flag keywords whose declared intent theme does not align with the campaign or ad-group offer.
+when:
+  all:
+    - keyword.intent_classified == true
+    - keyword.intent_alignment == mismatch
+exclude_when:
+  - business_context_missing == true
+severity:
+  level: medium
+confidence:
+  level: medium
+evidence_required:
+  - keyword
+  - ad_group_context
+  - offer_description
+finding:
+  title: Keyword intent does not match the target offer
+recommendation:
+  - move_or_restructure_keyword
+  - review_ad_and_landing_page_message_match
+impact:
+  dimension: conversion
+  level: medium
+action:
+  type: recommend
+human_approval_required: true
+related_skills:
+  - keyword-research
+  - campaign-structure
+  - ad-copy
+  - landing-page-audit
