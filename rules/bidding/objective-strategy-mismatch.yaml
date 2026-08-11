@@ -1,6 +1,6 @@
 id: BID-OBJ-001
 name: Bidding Objective Mismatch
-version: 1.0.1
+version: 1.1.0
 category: bidding
 description: Flag a bidding strategy that does not align with the declared business optimization objective.
 when:
@@ -35,3 +35,29 @@ related_skills:
 knowledge_dependencies:
   - knowledge/bidding/bidding-principles.md
   - knowledge/measurement/conversion-framework.md
+boundary_contract:
+  version: "1.0.0"
+  applicable_when:
+    - smart_bidding_in_scope: true
+  evidence_required:
+    - business_objective
+    - bidding_strategy
+    - primary_conversion_goal
+  states:
+    A: {state: APPLICABLE_VALID}
+    B: {state: APPLICABLE_TRIGGERED}
+    C: {state: APPLICABLE_MISSING_EVIDENCE}
+    D: {state: NOT_APPLICABLE}
+    E: {state: CONFLICTING_EVIDENCE}
+    F: {state: EXPLICIT_EXCLUSION}
+  conflict_policy:
+    enabled: true
+    when:
+      all:
+        - business_objective_defined: true
+        - bidding_strategy.objective_alignment: aligned
+        - mismatch_flag: true
+    resolution:
+      state: CONFLICTING_EVIDENCE
+      decision: FAIL
+      inference_used: false

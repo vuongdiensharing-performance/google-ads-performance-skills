@@ -1,6 +1,6 @@
 id: PMAX-GOAL-001
 name: PMax Primary Conversion Goal Risk
-version: 1.0.1
+version: 1.1.0
 category: pmax
 description: Flag PMax when the active primary conversion goal is missing, invalid, or not aligned with the campaign objective.
 when:
@@ -34,3 +34,29 @@ related_skills:
 knowledge_dependencies:
   - knowledge/pmax/pmax-principles.md
   - knowledge/measurement/conversion-framework.md
+boundary_contract:
+  version: "1.0.0"
+  applicable_when:
+    - campaign_type: performance_max
+  evidence_required:
+    - campaign_objective
+    - primary_conversion_goal
+    - conversion_tracking_status
+  states:
+    A: {state: APPLICABLE_VALID}
+    B: {state: APPLICABLE_TRIGGERED}
+    C: {state: APPLICABLE_MISSING_EVIDENCE}
+    D: {state: NOT_APPLICABLE}
+    E: {state: CONFLICTING_EVIDENCE}
+    F: {state: EXPLICIT_EXCLUSION}
+  conflict_policy:
+    enabled: true
+    when:
+      all:
+        - campaign_type: performance_max
+        - primary_conversion_goal.status: missing
+        - override: true
+    resolution:
+      state: CONFLICTING_EVIDENCE
+      decision: FAIL
+      inference_used: false

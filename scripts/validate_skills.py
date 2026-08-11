@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """Validate Core Skills, Rule dependencies, and Rule -> Knowledge provenance."""
 from __future__ import annotations
-
-import argparse
 from pathlib import Path
+import argparse
 import yaml
 
 REQUIRED = [
@@ -33,10 +32,7 @@ def normalize_conditional(items) -> list[dict]:
         if not isinstance(item, dict):
             normalized.append(item)
             continue
-        normalized.append({
-            "when": item.get("when"),
-            "rules": as_list(item.get("rules")),
-        })
+        normalized.append({"when": item.get("when"), "rules": as_list(item.get("rules"))})
     return normalized
 
 
@@ -66,8 +62,8 @@ def main() -> int:
     if registry.get("rule_provenance_registry") != "rules/registry.yaml":
         errors.append("registry: rule_provenance_registry must point to rules/registry.yaml")
 
-    if rule_registry.get("version") != "1.0.1":
-        errors.append("rule registry: expected version 1.0.1")
+    if rule_registry.get("version") != "1.1.0":
+        errors.append("rule registry: expected version 1.1.0")
     if rule_registry.get("schema") != "rule-knowledge-provenance/v1":
         errors.append("rule registry: expected schema rule-knowledge-provenance/v1")
     if rule_registry.get("dependency_policy", {}).get("no_inference") is not True:
@@ -76,6 +72,10 @@ def main() -> int:
         errors.append("rule registry: source_of_truth must be each_rule")
     if rule_registry.get("dependency_policy", {}).get("registry_role") != "machine_readable_index_and_cross_check":
         errors.append("rule registry: registry_role must be machine_readable_index_and_cross_check")
+    if rule_registry.get("boundary_contract", {}).get("version") != "1.0.0":
+        errors.append("rule registry: boundary_contract.version must be 1.0.0")
+    if rule_registry.get("boundary_contract", {}).get("source") != "docs/RULE_BOUNDARY_CONTRACT.md":
+        errors.append("rule registry: boundary_contract.source must point to canonical contract doc")
 
     rule_map: dict[str, dict] = {}
     rule_ids: dict[str, str] = {}
@@ -104,16 +104,12 @@ def main() -> int:
 
         if rule.get("id") != rule_id:
             errors.append(f"{path}: rule id != rule registry id")
-
-        # Rule-local declaration is the source of truth.
         rule_knowledge = normalize_paths(rule.get("knowledge_dependencies"))
         if not rule_knowledge:
             errors.append(f"{path}: missing knowledge_dependencies")
         for dep in rule_knowledge:
             if not Path(dep).exists():
                 errors.append(f"{path}: missing Knowledge dependency {dep}")
-
-        # Registry is a machine-readable index/cross-check and must mirror the Rule exactly.
         registry_knowledge = normalize_paths(entry.get("knowledge"))
         if rule_knowledge != registry_knowledge:
             errors.append(f"{path}: knowledge_dependencies != rule registry")
@@ -122,20 +118,17 @@ def main() -> int:
         name = entry["name"]
         expected_path = args.skills / name / "SKILL.md"
         declared_path = Path(entry.get("path", ""))
-
         if declared_path.as_posix() != expected_path.as_posix():
             errors.append(f"{name}: registry path mismatch")
         if not expected_path.exists():
             errors.append(f"{name}: missing SKILL.md")
             continue
-
         text = expected_path.read_text(encoding="utf-8")
         meta = frontmatter(text)
         if meta.get("name") != name:
             errors.append(f"{name}: frontmatter name mismatch")
         if not meta.get("version"):
             errors.append(f"{name}: missing version")
-
         for marker in REQUIRED:
             if marker not in text:
                 errors.append(f"{name}: missing section {marker}")
@@ -146,19 +139,13 @@ def main() -> int:
 
         registry_knowledge = normalize_paths(entry.get("knowledge"))
         registry_rules = normalize_paths(entry.get("rules"))
-        frontmatter_knowledge = normalize_paths(meta.get("knowledge_dependencies"))
-        frontmatter_rules = normalize_paths(meta.get("rule_dependencies"))
-
-        if frontmatter_knowledge != registry_knowledge:
+        if normalize_paths(meta.get("knowledge_dependencies")) != registry_knowledge:
             errors.append(f"{name}: frontmatter knowledge_dependencies != registry knowledge")
-        if frontmatter_rules != registry_rules:
+        if normalize_paths(meta.get("rule_dependencies")) != registry_rules:
             errors.append(f"{name}: frontmatter rule_dependencies != registry rules")
-
         registry_conditional = normalize_conditional(entry.get("conditional_rules"))
-        frontmatter_conditional = normalize_conditional(meta.get("conditional_rule_dependencies"))
-        if frontmatter_conditional != registry_conditional:
+        if normalize_conditional(meta.get("conditional_rule_dependencies")) != registry_conditional:
             errors.append(f"{name}: conditional Rule dependencies != registry conditional_rules")
-
         for dep in registry_knowledge + registry_rules:
             if not Path(dep).exists():
                 errors.append(f"{name}: missing dependency path {dep}")
@@ -166,10 +153,7 @@ def main() -> int:
             for dep in group.get("rules", []):
                 if not Path(dep).exists():
                     errors.append(f"{name}: missing conditional dependency path {dep}")
-
-        all_rule_paths = registry_rules + [
-            dep for group in registry_conditional for dep in group.get("rules", [])
-        ]
+        all_rule_paths = registry_rules + [dep for group in registry_conditional for dep in group.get("rules", [])]
         for rule_path in all_rule_paths:
             if rule_path not in rule_map:
                 errors.append(f"{name}: Rule missing from rule provenance registry: {rule_path}")
@@ -178,10 +162,7 @@ def main() -> int:
         print("SKILL VALIDATION FAILED")
         print("\n".join(f"- {e}" for e in errors))
         return 1
-    print(
-        f"SKILL VALIDATION PASSED: {len(entries)} Core Skills; "
-        f"{len(rule_entries)} Rules; Rule-local -> Knowledge provenance consistent"
-    )
+    print(f"SKILL VALIDATION PASSED: {len(entries)} Core Skills; {len(rule_entries)} Rules; Rule-local -> Knowledge provenance consistent")
     return 0
 
 

@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rule-boundary-contract/v1",
+  "title": "Rule Boundary Contract",
+  "type": "object",
+  "required": ["boundary_contract", "resolution_precedence"],
+  "properties": {
+    "boundary_contract": {
+      "type": "object",
+      "required": ["version", "states"],
+      "properties": {
+        "version": {"type": "string"},
+        "states": {
+          "type": "object",
+          "required": ["A", "B", "C", "D", "E", "F"],
+          "additionalProperties": false,
+          "properties": {
+            "A": {"$ref": "#/$defs/state"},
+            "B": {"$ref": "#/$defs/state"},
+            "C": {"$ref": "#/$defs/state"},
+            "D": {"$ref": "#/$defs/state"},
+            "E": {"$ref": "#/$defs/state"},
+            "F": {"$ref": "#/$defs/state"}
+          }
+        }
+      }
+    },
+    "resolution_precedence": {
+      "type": "array",
+      "const": [
+        "NOT_APPLICABLE",
+        "APPLICABLE_MISSING_EVIDENCE",
+        "CONFLICTING_EVIDENCE",
+        "EXPLICIT_EXCLUSION",
+        "APPLICABLE_TRIGGERED",
+        "APPLICABLE_VALID"
+      ]
+    }
+  },
+  "$defs": {
+    "state": {
+      "type": "object",
+      "required": ["id", "decision", "finding_generated"],
+      "properties": {
+        "id": {
+          "enum": [
+            "APPLICABLE_VALID",
+            "APPLICABLE_TRIGGERED",
+            "APPLICABLE_MISSING_EVIDENCE",
+            "NOT_APPLICABLE",
+            "CONFLICTING_EVIDENCE",
+            "EXPLICIT_EXCLUSION"
+          ]
+        },
+        "decision": {"type": "string"},
+        "finding_generated": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "x-canonical-resolution-precedence": [
+    "NOT_APPLICABLE",
+    "APPLICABLE_MISSING_EVIDENCE",
+    "CONFLICTING_EVIDENCE",
+    "EXPLICIT_EXCLUSION",
+    "APPLICABLE_TRIGGERED",
+    "APPLICABLE_VALID"
+  ],
+  "x-canonical-decisions": {
+    "APPLICABLE_VALID": "PASS",
+    "APPLICABLE_TRIGGERED": "FAIL",
+    "APPLICABLE_MISSING_EVIDENCE": "INSUFFICIENT_EVIDENCE",
+    "NOT_APPLICABLE": "NOT_APPLICABLE",
+    "CONFLICTING_EVIDENCE": "POLICY_DEFINED",
+    "EXPLICIT_EXCLUSION": "SUPPRESSED"
+  },
+  "x-canonical-finding-generated": {
+    "APPLICABLE_VALID": false,
+    "APPLICABLE_TRIGGERED": true,
+    "APPLICABLE_MISSING_EVIDENCE": false,
+    "NOT_APPLICABLE": false,
+    "CONFLICTING_EVIDENCE": false,
+    "EXPLICIT_EXCLUSION": false
+  }
+}
