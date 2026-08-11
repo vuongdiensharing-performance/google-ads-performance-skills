@@ -1,9 +1,14 @@
 ---
 name: competitor-analysis
-version: 1.1.1
+version: 1.2.0
 description: Analyze observable competitor positioning, search presence, messaging, and auction context to inform Google Ads strategy.
 category: strategy
 status: core
+knowledge_dependencies:
+  - knowledge/strategy/intent-framework.md
+  - knowledge/keyword/keyword-intent.md
+rule_dependencies:
+  - rules/structure/mixed-intent-campaign.yaml
 ---
 # Competitor Analysis
 ## Purpose
