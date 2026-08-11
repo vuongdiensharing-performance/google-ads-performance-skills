@@ -1,9 +1,15 @@
 ---
 name: shopping-ads
-version: 1.1.0
+version: 1.2.0
 description: Plan, audit, and optimize Google Shopping around feed quality, product segmentation, bidding, budget, and commercial economics.
 category: campaign-type
 status: core
+knowledge_dependencies:
+  - knowledge/pmax/pmax-principles.md
+  - knowledge/measurement/conversion-framework.md
+rule_dependencies:
+  - rules/pmax/primary-goal-missing.yaml
+  - rules/budget/budget-constraint-opportunity.yaml
 ---
 # Shopping Ads
 ## Purpose
