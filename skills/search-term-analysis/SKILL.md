@@ -1,9 +1,17 @@
 ---
 name: search-term-analysis
-version: 1.1.0
+version: 1.2.0
 description: Analyze Google Ads search terms to identify intent, wasted spend, negative candidates, winners, and expansion opportunities.
 category: analytics
 status: core
+knowledge_dependencies:
+  - knowledge/search/search-term-methodology.md
+  - knowledge/keyword/keyword-intent.md
+  - knowledge/measurement/conversion-framework.md
+rule_dependencies:
+  - rules/search-term/irrelevant-intent.yaml
+  - rules/search-term/high-spend-zero-conversion.yaml
+  - rules/search-term/expansion-candidate.yaml
 ---
 # Search Term Analysis
 ## Purpose
