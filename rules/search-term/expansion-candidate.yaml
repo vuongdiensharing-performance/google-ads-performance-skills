@@ -1,0 +1,34 @@
+id: ST-EXPAND-001
+name: High Value Search Term Expansion Candidate
+version: 1.0.0
+category: search_term
+description: Identify search terms that show validated commercial relevance and downstream value and may deserve keyword expansion.
+when:
+  all:
+    - search_term.intent_alignment == relevant
+    - conversions > 0
+    - evidence.conversion_quality_validated == true
+exclude_when:
+  - search_term.is_brand_only_without_strategy_reason == true
+severity:
+  level: info
+confidence:
+  level: medium
+evidence_required:
+  - search_term
+  - conversion_data
+  - business_quality_data
+finding:
+  title: Search term is a validated expansion candidate
+recommendation:
+  - review_keyword_expansion
+  - map_to_existing_or_new_intent_theme
+impact:
+  dimension: scale
+  level: medium
+action:
+  type: recommend
+human_approval_required: true
+related_skills:
+  - search-term-analysis
+  - keyword-research
