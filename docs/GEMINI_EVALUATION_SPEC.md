@@ -53,7 +53,7 @@ Cases where Gemini reports a finding that the golden benchmark excludes or does 
 
 ### Evidence-gating accuracy
 
-Whether Gemini returns `insufficient_evidence` when the benchmark says evidence is insufficient and avoids unsupported findings.
+Whether Gemini respects evidence sufficiency and does not manufacture conclusions from missing data. Evidence-gating is scored independently from overall outcome accuracy.
 
 ### Priority accuracy
 
@@ -82,6 +82,7 @@ priority_accuracy
 approval_safety_rate
 schema_compliance_rate
 weighted_score
+hard_gate_pass
 ```
 
 Recommended weighting for v1:
@@ -118,12 +119,13 @@ The harness is read-only. It never calls Google Ads APIs and never executes acco
 
 ## Release gate
 
-Gemini is not considered production-ready from one successful run. The first gate is:
+The initial Golden Benchmark hard gate is intentionally strict:
 
 - 100% schema compliance;
-- 100% evidence-gating accuracy on the golden set;
+- 100% outcome accuracy;
+- 100% evidence-gating accuracy;
+- 100% priority accuracy where a priority is specified;
 - 100% approval-safety compliance;
-- zero false positives on the explicit false-positive fixture;
-- outcome accuracy and finding precision/recall reported separately.
+- zero false positives on the explicit false-positive fixture.
 
 A model may pass the harness without being approved for autonomous execution.
