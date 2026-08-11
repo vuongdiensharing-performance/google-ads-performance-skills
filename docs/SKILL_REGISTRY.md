@@ -1,27 +1,68 @@
-# Skill Registry v1.1
+# Skill Registry v2.0
 
-The registry is the canonical map of Core Skills, their Knowledge and Rule dependencies, and their runtime role. Every Core Skill must follow `docs/SKILL_SPEC.md` and consume the Rule Engine where deterministic checks are applicable.
+The registry is the canonical machine-readable dependency graph for Core Skills. Each Skill declares exact repository-relative Knowledge and Rule paths, and the registry mirrors those declarations for tooling, validation, orchestration, and model grounding.
 
-| ID | Skill | Category | Knowledge | Core Rules | Runtime role |
-|---|---|---|---|---|---|
-| S01 | account-audit | audit | structure, intent, bidding, measurement, diagnosis | structure, bidding, search, conversion, budget, ad/PMax | orchestrator |
-| S02 | campaign-strategy | strategy | intent, funnel, structure, bidding | mixed-intent, fragmentation | planner |
-| S03 | campaign-structure | strategy | structure, intent, keyword | fragmentation, mixed-intent | architect |
-| S04 | keyword-research | acquisition | keyword-intent, match-types, intent | intent-mismatch, broad-without-smart-bidding | researcher |
-| S05 | search-term-analysis | analytics | search-methodology, keyword-intent, conversion | irrelevant-intent, spend-zero-conversion, expansion | diagnostician |
-| S06 | negative-keyword-mining | acquisition | keyword-intent, match-types, search-methodology | irrelevant-intent, spend-zero-conversion | action-preparer |
-| S07 | quality-score | optimization | match-types, message-match, diagnosis | low-quality-score, message-match | diagnostician |
-| S08 | ad-copy | creative | message-match, keyword-intent | pinning, message-match | generator |
-| S09 | landing-page-audit | conversion | message-match, conversion | message-match, tracking-integrity | auditor |
-| S10 | bidding-strategy | optimization | bidding, conversion, diagnosis | objective-mismatch, target-changes, signal-risk, broad-context | optimizer |
-| S11 | budget-optimization | optimization | bidding, diagnosis | budget-opportunity, scale-quality-risk | optimizer |
-| S12 | pmax-optimization | campaign-type | PMax, PMax-B2B, conversion | primary-goal, recent-change, negative-restriction | specialist |
-| S13 | shopping-ads | campaign-type | PMax, conversion | primary-goal, budget-opportunity | specialist |
-| S14 | audience-strategy | targeting | intent, conversion | lead-quality-gap | strategist |
-| S15 | remarketing-strategy | targeting | intent, conversion | lead-quality-gap | strategist |
-| S16 | competitor-analysis | strategy | intent, keyword | mixed-intent | researcher |
-| S17 | conversion-tracking | measurement | conversion | primary-micro-conversion, tracking-integrity, lead-quality | measurement auditor |
-| S18 | performance-diagnosis | analytics | diagnosis, conversion, bidding | spend-zero-conversion, signal-risk, scale-quality-risk | diagnostician |
+## Core Skills
+
+| ID | Skill | Path | Category | Runtime role |
+|---|---|---|---|---|
+| S01 | account-audit | `skills/account-audit/SKILL.md` | audit | orchestrator |
+| S02 | campaign-strategy | `skills/campaign-strategy/SKILL.md` | strategy | planner |
+| S03 | campaign-structure | `skills/campaign-structure/SKILL.md` | strategy | architect |
+| S04 | keyword-research | `skills/keyword-research/SKILL.md` | acquisition | researcher |
+| S05 | search-term-analysis | `skills/search-term-analysis/SKILL.md` | analytics | diagnostician |
+| S06 | negative-keyword-mining | `skills/negative-keyword-mining/SKILL.md` | acquisition | action-preparer |
+| S07 | quality-score | `skills/quality-score/SKILL.md` | optimization | diagnostician |
+| S08 | ad-copy | `skills/ad-copy/SKILL.md` | creative | generator |
+| S09 | landing-page-audit | `skills/landing-page-audit/SKILL.md` | conversion | auditor |
+| S10 | bidding-strategy | `skills/bidding-strategy/SKILL.md` | optimization | optimizer |
+| S11 | budget-optimization | `skills/budget-optimization/SKILL.md` | optimization | optimizer |
+| S12 | pmax-optimization | `skills/pmax-optimization/SKILL.md` | campaign-type | specialist |
+| S13 | shopping-ads | `skills/shopping-ads/SKILL.md` | campaign-type | specialist |
+| S14 | audience-strategy | `skills/audience-strategy/SKILL.md` | targeting | strategist |
+| S15 | remarketing-strategy | `skills/remarketing-strategy/SKILL.md` | targeting | strategist |
+| S16 | competitor-analysis | `skills/competitor-analysis/SKILL.md` | strategy | researcher |
+| S17 | conversion-tracking | `skills/conversion-tracking/SKILL.md` | measurement | measurement-auditor |
+| S18 | performance-diagnosis | `skills/performance-diagnosis/SKILL.md` | analytics | diagnostician |
+
+## Machine registry
+
+`skills/registry.yaml` is the source used by tooling and orchestration. Version 2.0 uses this shape:
+
+```yaml
+version: 2.0.0
+schema: skill-dependency-graph/v1
+dependency_policy:
+  knowledge: exact_repository_paths
+  rules: exact_repository_paths
+  no_inference: true
+skills:
+  - id: S01
+    name: account-audit
+    path: skills/account-audit/SKILL.md
+    knowledge:
+      - knowledge/structure/account-structure.md
+    rules:
+      - rules/structure/fragmentation-risk.yaml
+    conditional_rules:
+      - when: pmax_or_shopping_campaign_present
+        rules:
+          - rules/pmax/primary-goal-missing.yaml
+```
+
+The full dependency graph lives in `skills/registry.yaml`; this document deliberately does not duplicate all dependency paths.
+
+## Dependency contract
+
+For every Core Skill:
+
+1. `path` points to the exact `SKILL.md`.
+2. `knowledge` contains exact repository-relative Knowledge paths.
+3. `rules` contains exact repository-relative Rule paths.
+4. Conditional Rule dependencies contain exact paths plus a machine-readable activation condition.
+5. No consumer may infer Rule filenames from category names or directory names.
+6. The registry must match the corresponding Skill frontmatter exactly.
+7. Every dependency path must exist in the repository.
 
 ## Runtime contract
 
@@ -30,18 +71,6 @@ Every Core Skill follows:
 `Validate → Load Knowledge → Normalize Context → Run Rules → Classify → Prioritize → Recommend → Measure`
 
 The exact stages may be shortened for generative/planning Skills, but evidence validation, dependency loading, and safety must remain explicit.
-
-## Machine registry
-
-`skills/registry.yaml` mirrors this document for tooling and validation.
-
-## Knowledge Registry
-
-V1 populated assets include intent, funnel strategy, account structure, keyword intent, match types, bidding principles, conversion framework, search-term methodology, RSA/message match, PMax principles/B2B, and performance diagnosis.
-
-## Rule Registry
-
-V1 contains reusable evidence-gated Rules across search terms, keywords, bidding, conversion, budget, structure, ads, and Performance Max. Rules return findings; Skills assign business priority.
 
 ## Dependency graph
 
@@ -62,7 +91,7 @@ V1 contains reusable evidence-gated Rules across search terms, keywords, bidding
 ## Registry rules
 
 - Every Skill must have a matching directory and `SKILL.md`.
-- Every Core Skill must name Knowledge and Rule dependencies.
+- Every Core Skill must declare exact Knowledge and Rule dependencies.
 - Rule Engine results must not be presented as causality without supporting evidence.
 - Severity and priority remain separate.
 - Source-repository claims are lineage, not authority.
