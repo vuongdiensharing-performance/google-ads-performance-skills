@@ -76,7 +76,7 @@ skills:
       - knowledge/strategy/intent-framework.md
     rules:
       - rules/keyword/intent-theme-mismatch.yaml
-      - rules/bidding/broad-without-smart-bidding.yaml
+      - rules/keyword/broad-without-smart-bidding.yaml
   - id: S05
     name: search-term-analysis
     path: skills/search-term-analysis/SKILL.md
@@ -149,7 +149,7 @@ skills:
       - rules/bidding/objective-strategy-mismatch.yaml
       - rules/bidding/frequent-target-changes.yaml
       - rules/bidding/conversion-signal-risk.yaml
-      - rules/bidding/broad-without-smart-bidding.yaml
+      - rules/keyword/broad-without-smart-bidding.yaml
   - id: S11
     name: budget-optimization
     path: skills/budget-optimization/SKILL.md
