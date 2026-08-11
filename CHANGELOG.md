@@ -1,5 +1,34 @@
 # Changelog
 
+## 2026-08-11 — Gate 2B.1 Rule Knowledge Provenance Hardening
+
+### Changed
+
+- Added mandatory `knowledge_dependencies` to the canonical Rule schema in `docs/RULE_SPEC.md`.
+- Added exact Rule → Knowledge declarations to all 21 active V1 Rules referenced by the Skill Registry.
+- Added `rules/registry.yaml` as the machine-readable `rule-knowledge-provenance/v1` registry.
+- Upgraded `skills/registry.yaml` to `2.1.0` and linked it to `rules/registry.yaml` via `rule_provenance_registry`.
+- Extended `scripts/validate_skills.py` to validate Rule file ↔ Rule Registry ↔ Knowledge paths and Skill Rule dependencies ↔ Rule Registry membership.
+- Added a hard no-inference policy for Rule → Knowledge resolution.
+
+### Traceability contract
+
+The intended provenance chain is now explicitly resolvable as:
+
+```text
+Finding
+  ↓
+Evidence
+  ↓
+Rule
+  ↓
+Knowledge
+  ↓
+Skill
+```
+
+Rule → Knowledge links are exact repository-relative paths and are no longer inferred from Rule category, filename, directory, or related Skill.
+
 ## 2026-08-11 — Phase 6 Gate 2 Preparation
 
 ### Changed
