@@ -27,8 +27,7 @@ cases:
       primary_status: true
       stronger_business_outcome_available: false
       stronger_conversion_action: qualified_lead
-      campaigns_have_materially_similar_intent: false
-      fragmentation_reason: none
+      fragmentation_risk_signal: false
       separation_reason: documented
       budget_or_bidding_control_requires_separation: false
       geography_or_business_unit_requires_separation: false
@@ -71,8 +70,7 @@ cases:
       primary_status: true
       stronger_business_outcome_available: true
       stronger_conversion_action: qualified_lead
-      campaigns_have_materially_similar_intent: true
-      fragmentation_reason: none
+      fragmentation_risk_signal: true
       separation_reason: none
       budget_or_bidding_control_requires_separation: false
       geography_or_business_unit_requires_separation: false
@@ -139,8 +137,7 @@ cases:
       primary_status: true
       stronger_business_outcome_available: false
       stronger_conversion_action: qualified_lead
-      campaigns_have_materially_similar_intent: true
-      fragmentation_reason: product_and_geo_controls
+      fragmentation_risk_signal: true
       separation_reason: geography
       budget_or_bidding_control_requires_separation: false
       geography_or_business_unit_requires_separation: true
