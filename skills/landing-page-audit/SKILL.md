@@ -1,6 +1,6 @@
 ---
 name: landing-page-audit
-version: 1.1.0
+version: 1.1.1
 description: Audit landing pages for message match, relevance, trust, usability, conversion friction, and measurement readiness.
 category: conversion
 status: core
@@ -45,7 +45,7 @@ Prioritize issues that can block qualified users or break measurement. Do not eq
 ## Confidence
 High for directly observable content; Medium/Low for technical or causal claims without measurement.
 ## Safety
-Do not claim page-speed, Core Web Vitals, or technical metrics without measured evidence.
+Do not claim page-speed, Core Web Vitals, or technical metrics without measured evidence. Recommendations that change the live page, tracking, or campaign configuration require explicit human approval before execution.
 ## Related Skills
 `ad-copy`, `conversion-tracking`, `quality-score`, `performance-diagnosis`
 ## Examples
