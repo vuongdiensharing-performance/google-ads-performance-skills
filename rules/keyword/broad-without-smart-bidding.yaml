@@ -1,6 +1,6 @@
 id: KW-BROAD-001
 name: Broad Match Without Conversion-Based Smart Bidding
-version: 1.0.0
+version: 1.0.1
 category: keyword
 description: Flag broad-match usage when the campaign is not using a conversion-oriented Smart Bidding strategy, subject to current platform behavior and campaign context.
 when:
@@ -37,3 +37,7 @@ related_skills:
   - keyword-research
   - bidding-strategy
   - conversion-tracking
+knowledge_dependencies:
+  - knowledge/keyword/match-types.md
+  - knowledge/bidding/bidding-principles.md
+  - knowledge/measurement/conversion-framework.md
