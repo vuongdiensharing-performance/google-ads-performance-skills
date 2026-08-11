@@ -57,12 +57,14 @@ def main() -> int:
     rule_entries = rule_registry.get("rules", [])
     errors: list[str] = []
 
-    if registry.get("version") != "2.0.0":
-        errors.append("registry: expected version 2.0.0")
+    if registry.get("version") != "2.1.0":
+        errors.append("registry: expected version 2.1.0")
     if registry.get("schema") != "skill-dependency-graph/v1":
         errors.append("registry: expected schema skill-dependency-graph/v1")
     if registry.get("dependency_policy", {}).get("no_inference") is not True:
         errors.append("registry: dependency_policy.no_inference must be true")
+    if registry.get("rule_provenance_registry") != "rules/registry.yaml":
+        errors.append("registry: rule_provenance_registry must point to rules/registry.yaml")
 
     if rule_registry.get("version") != "1.0.0":
         errors.append("rule registry: expected version 1.0.0")
