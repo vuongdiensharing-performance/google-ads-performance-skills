@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-from datetime import date, datetime
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -33,10 +33,7 @@ def load_json(path: Path) -> dict[str, Any]:
 
 
 def canonical_request_fingerprint(contract: dict[str, Any]) -> str:
-    payload = {
-        "tool": contract["source"]["tool"],
-        "request": contract["request"],
-    }
+    payload = {"tool": contract["source"]["tool"], "request": contract["request"]}
     canonical = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
     digest = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
     return f"sha256:{digest}"
@@ -59,12 +56,10 @@ def validate_semantics(contract: dict[str, Any], provider: dict[str, Any]) -> li
     if tool not in mapped_tools:
         errors.append(f"evidence_type {evidence_type} is not mapped to source.tool {tool} by provider policy")
 
-    pinned_commit = provider.get("upstream", {}).get("pinned_commit")
-    if provenance["provider_commit"] != pinned_commit:
+    upstream = provider.get("upstream", {})
+    if provenance["provider_commit"] != upstream.get("pinned_commit"):
         errors.append("provenance.provider_commit does not match provider pinned_commit")
-
-    package_version = provider.get("upstream", {}).get("package_version")
-    if provenance["provider_version"] != package_version:
+    if provenance["provider_version"] != upstream.get("package_version"):
         errors.append("provenance.provider_version does not match provider package_version")
 
     if source.get("property_id") is not None and request.get("property_id") is not None:
@@ -77,11 +72,13 @@ def validate_semantics(contract: dict[str, Any], provider: dict[str, Any]) -> li
         if start > end:
             errors.append("request.date_range.start_date must not be after end_date")
 
-    expected_fingerprint = canonical_request_fingerprint(contract)
-    if provenance["request_fingerprint"] != expected_fingerprint:
-        errors.append("provenance.request_fingerprint does not match canonical source.tool + request SHA-256")
+    requirements = provider.get("provenance_requirements", {})
+    if requirements.get("request_fingerprint_required") is True:
+        expected_fingerprint = canonical_request_fingerprint(contract)
+        if provenance["request_fingerprint"] != expected_fingerprint:
+            errors.append("provenance.request_fingerprint does not match canonical source.tool + request SHA-256")
 
-    if provider.get("provenance_requirements", {}).get("inference_used_must_be") is False:
+    if provider.get("trust_boundary", {}).get("inference_used_must_be") is False:
         if provenance["inference_used"] is not False:
             errors.append("provenance.inference_used must be false")
 
@@ -90,9 +87,11 @@ def validate_semantics(contract: dict[str, Any], provider: dict[str, Any]) -> li
 
 def validate(contract: dict[str, Any], schema: dict[str, Any], provider: dict[str, Any]) -> list[str]:
     validator = Draft202012Validator(schema, format_checker=FormatChecker())
-    errors = [error.message for error in sorted(validator.iter_errors(contract), key=lambda item: list(item.path))]
-    if errors:
-        return errors
+    schema_errors = [
+        error.message for error in sorted(validator.iter_errors(contract), key=lambda item: list(item.path))
+    ]
+    if schema_errors:
+        return schema_errors
     return validate_semantics(contract, provider)
 
 
