@@ -1,4 +1,4 @@
-# Rule Specification v1
+# Rule Specification v1.1
 
 ## Purpose
 
@@ -56,6 +56,11 @@ human_approval_required: false
 related_skills:
   - keyword-research
   - bidding-strategy
+
+knowledge_dependencies:
+  - knowledge/keyword/match-types.md
+  - knowledge/bidding/bidding-principles.md
+  - knowledge/measurement/conversion-framework.md
 ```
 
 ## Rule requirements
@@ -72,7 +77,22 @@ Every Rule must define:
 - recommendation;
 - impact;
 - action type;
-- human-approval behavior where an account mutation is possible.
+- human-approval behavior where an account mutation is possible;
+- explicit `knowledge_dependencies` using exact repository-relative paths.
+
+## Knowledge provenance
+
+`knowledge_dependencies` is a mandatory machine-readable provenance declaration. It identifies the Knowledge assets that provide the principles/frameworks used to interpret the Rule's condition, evidence, finding, recommendation, or impact.
+
+Consumers MUST NOT infer Rule → Knowledge relationships from:
+
+- Rule category;
+- directory name;
+- Rule filename;
+- `related_skills`;
+- semantic similarity.
+
+The declared paths must exist and must be mirrored by the Rule Knowledge Provenance Registry. A Rule may depend on multiple Knowledge assets when the decision spans multiple domains.
 
 ## Evidence first
 
@@ -101,4 +121,4 @@ Mutation actions require human approval by default.
 
 ## Rule quality gates
 
-A Rule is valid when it is testable, evidence-bound, explicit about false positives, and does not present an industry heuristic as an immutable Google Ads platform rule.
+A Rule is valid when it is testable, evidence-bound, explicit about false positives, provenance-linked to Knowledge, and does not present an industry heuristic as an immutable Google Ads platform rule.
