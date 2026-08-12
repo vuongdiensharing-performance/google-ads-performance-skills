@@ -1,5 +1,4 @@
 import copy
-import json
 import unittest
 from pathlib import Path
 
@@ -16,6 +15,7 @@ from validate_boundary_contract import (  # noqa: E402
     load_contract_schema,
     load_yaml,
     validate_rule,
+    validate_state_mappings,
 )
 
 
@@ -60,20 +60,19 @@ class BoundaryContractValidatorTests(unittest.TestCase):
             ],
         )
 
-    def test_schema_rejects_rule_local_decision_drift(self) -> None:
-        registry_by_id = {item["id"]: item for item in self.registry["rules"]}
-        rule = load_yaml(ROOT / registry_by_id["STR-FRAG-001"]["path"])
-        contract = copy.deepcopy(rule["boundary_contract"])
-        contract["states"]["B"]["decision"] = "PASS"
-        envelope = {
-            "boundary_contract": contract,
-            "resolution_precedence": self.schema["x-canonical-resolution-precedence"],
-        }
-        errors = list(Draft202012Validator(self.schema).iter_errors(envelope))
-        self.assertFalse(errors, "JSON Schema validates shape; semantic canonical drift is checked by validate_rule")
-        rule_path = ROOT / registry_by_id["STR-FRAG-001"]["path"]
-        # The persisted Rule must remain canonical after the mutation attempt.
-        self.assertEqual(load_yaml(rule_path)["boundary_contract"]["states"]["B"]["decision"], "FAIL")
+    def test_validator_rejects_rule_local_decision_drift(self) -> None:
+        rule = load_yaml(ROOT / "rules/structure/fragmentation-risk.yaml")
+        states = copy.deepcopy(rule["boundary_contract"]["states"])
+        states["B"]["decision"] = "PASS"
+        errors = validate_state_mappings(states, self.schema)
+        self.assertIn("Rule-local decision for APPLICABLE_TRIGGERED conflicts with canonical decision", errors)
+
+    def test_validator_rejects_finding_generation_drift(self) -> None:
+        rule = load_yaml(ROOT / "rules/structure/fragmentation-risk.yaml")
+        states = copy.deepcopy(rule["boundary_contract"]["states"])
+        states["B"]["finding_generated"] = False
+        errors = validate_state_mappings(states, self.schema)
+        self.assertIn("Rule-local finding_generated for APPLICABLE_TRIGGERED conflicts with canonical contract", errors)
 
     def test_machine_readable_contract_has_no_inference(self) -> None:
         registry_by_id = {item["id"]: item for item in self.registry["rules"]}
