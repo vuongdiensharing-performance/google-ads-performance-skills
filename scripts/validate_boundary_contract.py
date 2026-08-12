@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from jsonschema import Draft202012Validator
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_PATH = ROOT / "schemas/boundary-contract.json"
@@ -29,13 +30,6 @@ def load_yaml(path: Path) -> dict[str, Any]:
     data = yaml.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(data, dict):
         raise ValueError("YAML root must be a mapping")
-    return data
-
-
-def load_contract_schema() -> dict[str, Any]:
-    data = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
-    if not isinstance(data, dict):
-        raise ValueError("Boundary schema root must be a mapping")
     return data
 
 
@@ -87,6 +81,19 @@ def validate_registry(registry: dict[str, Any]) -> list[str]:
     return errors
 
 
+def validate_schema_contract(contract: dict[str, Any], schema: dict[str, Any]) -> list[str]:
+    """Apply the canonical JSON Schema before any semantic cross-checks."""
+    document = {
+        "boundary_contract": contract,
+        "resolution_precedence": schema["x-canonical-resolution-precedence"],
+    }
+    validator = Draft202012Validator(schema)
+    return [
+        error.message
+        for error in sorted(validator.iter_errors(document), key=lambda item: list(item.path))
+    ]
+
+
 def validate_rule(rule_path: Path, registry: dict[str, Any], schema: dict[str, Any]) -> list[str]:
     errors: list[str] = []
     try:
@@ -97,6 +104,9 @@ def validate_rule(rule_path: Path, registry: dict[str, Any], schema: dict[str, A
     contract = rule.get("boundary_contract")
     if not isinstance(contract, dict):
         return ["missing boundary_contract"]
+
+    errors.extend(f"schema: {error}" for error in validate_schema_contract(contract, schema))
+
     missing = sorted(REQUIRED_FIELDS - set(contract))
     if missing:
         errors.append(f"boundary_contract missing fields: {', '.join(missing)}")
@@ -180,6 +190,7 @@ def main() -> int:
     try:
         schema = json.loads(args.schema.resolve().read_text(encoding="utf-8"))
         global_errors.extend(validate_global_contract(schema))
+        Draft202012Validator.check_schema(schema)
     except Exception as exc:
         global_errors.append(f"boundary schema error: {exc}")
         schema = {}

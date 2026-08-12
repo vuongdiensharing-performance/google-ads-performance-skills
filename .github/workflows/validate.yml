@@ -21,13 +21,15 @@ jobs:
       - run: python scripts/validate_skills.py --skills skills --registry skills/registry.yaml
       - run: python scripts/evaluate_fixtures.py --fixtures evals/fixtures
       - run: python scripts/evaluate_gemini_account_audit.py --mode offline
-      - name: Validate Gate 2C boundary contracts
+      - name: Gate 2C.1A — Boundary Contract Validator
         run: >-
           python scripts/validate_boundary_contract.py
           --rules rules
           --registry rules/registry.yaml
           --rule-ids STR-FRAG-001 CV-TRACK-001 BID-OBJ-001 BUD-OPP-001 ST-SPEND-001 PMAX-GOAL-001
-      - name: Run Gate 2C boundary matrix
+      - name: Gate 2C.1 — 36 Boundary Fixtures + State Machine
+        run: python scripts/test_boundary_machine.py --fixtures evals/account-audit/boundary_matrix.yaml --runs 1
+      - name: Gate 2C.2 — Determinism (5 identical executions per fixture)
         run: python scripts/test_boundary_machine.py --fixtures evals/account-audit/boundary_matrix.yaml --runs 5
       - name: Validate GA4 report evidence contract
         run: python scripts/validate_ga4_evidence_contract.py --fixture evals/ga4/ga4_evidence_contract.yaml
