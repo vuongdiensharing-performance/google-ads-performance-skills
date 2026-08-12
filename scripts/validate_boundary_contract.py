@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from jsonschema import Draft202012Validator
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_PATH = ROOT / "schemas/boundary-contract.json"
@@ -32,8 +33,8 @@ def load_yaml(path: Path) -> dict[str, Any]:
     return data
 
 
-def load_contract_schema() -> dict[str, Any]:
-    data = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+def load_contract_schema(path: Path = SCHEMA_PATH) -> dict[str, Any]:
+    data = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(data, dict):
         raise ValueError("Boundary schema root must be a mapping")
     return data
@@ -69,6 +70,11 @@ def validate_global_contract(schema: dict[str, Any]) -> list[str]:
         errors.append("canonical finding map must cover exactly A-F state IDs")
     if any(not isinstance(value, bool) for value in findings.values()):
         errors.append("canonical finding map values must be booleans")
+
+    try:
+        Draft202012Validator.check_schema(schema)
+    except Exception as exc:
+        errors.append(f"boundary-contract.json is not a valid Draft 2020-12 schema: {exc}")
     return errors
 
 
@@ -84,6 +90,23 @@ def validate_registry(registry: dict[str, Any]) -> list[str]:
     for entry in entries:
         if not isinstance(entry, dict) or not entry.get("id") or not entry.get("path"):
             errors.append("every registry entry must declare id and path")
+    return errors
+
+
+def validate_state_mappings(states: Any, schema: dict[str, Any]) -> list[str]:
+    errors: list[str] = []
+    _, decisions, findings = canonical_contract(schema)
+    if not isinstance(states, dict) or tuple(states.keys()) != STATE_KEYS:
+        return ["boundary_contract.states must declare exactly A, B, C, D, E, F"]
+    for key, expected_id in EXPECTED_STATE_IDS.items():
+        state = states.get(key)
+        if not isinstance(state, dict) or state.get("state") != expected_id:
+            errors.append(f"state {key} must map to {expected_id}")
+            continue
+        if state.get("decision") != decisions[expected_id]:
+            errors.append(f"Rule-local decision for {expected_id} conflicts with canonical decision")
+        if state.get("finding_generated") != findings[expected_id]:
+            errors.append(f"Rule-local finding_generated for {expected_id} conflicts with canonical contract")
     return errors
 
 
@@ -115,13 +138,7 @@ def validate_rule(rule_path: Path, registry: dict[str, Any], schema: dict[str, A
         errors.append("boundary_contract.evidence_required must exactly mirror Rule evidence_required")
 
     states = contract.get("states")
-    if not isinstance(states, dict) or tuple(states.keys()) != STATE_KEYS:
-        errors.append("boundary_contract.states must declare exactly A, B, C, D, E, F")
-    else:
-        for key, expected_id in EXPECTED_STATE_IDS.items():
-            state = states.get(key)
-            if not isinstance(state, dict) or state.get("state") != expected_id:
-                errors.append(f"state {key} must map to {expected_id}")
+    errors.extend(validate_state_mappings(states, schema))
 
     conflict = contract.get("conflict_policy")
     if not isinstance(conflict, dict) or conflict.get("enabled") is not True:
@@ -140,6 +157,28 @@ def validate_rule(rule_path: Path, registry: dict[str, Any], schema: dict[str, A
             if resolution.get("decision") not in ALLOWED_DECISIONS:
                 errors.append("conflict policy has invalid decision")
 
+    # Gate 2C.1A: validate the Rule-local contract against the canonical JSON Schema.
+    if not missing and isinstance(states, dict) and isinstance(conflict, dict):
+        _, decisions, findings = canonical_contract(schema)
+        normalized_states: dict[str, Any] = {}
+        for key, state_id in EXPECTED_STATE_IDS.items():
+            local = states.get(key, {})
+            normalized_states[key] = {
+                "state": local.get("state"),
+                "decision": local.get("decision", decisions.get(state_id)),
+                "finding_generated": local.get("finding_generated", findings.get(state_id)),
+            }
+        envelope = {
+            "boundary_contract": {
+                **contract,
+                "states": normalized_states,
+            },
+            "resolution_precedence": schema.get("x-canonical-resolution-precedence"),
+        }
+        for error in Draft202012Validator(schema).iter_errors(envelope):
+            location = ".".join(str(part) for part in error.absolute_path) or "<root>"
+            errors.append(f"JSON Schema violation at {location}: {error.message}")
+
     rule_id = rule.get("id")
     entries = [item for item in registry.get("rules", []) if item.get("id") == rule_id]
     if len(entries) != 1:
@@ -154,17 +193,6 @@ def validate_rule(rule_path: Path, registry: dict[str, Any], schema: dict[str, A
         if not (ROOT / entry.get("path", "")).is_file():
             errors.append("registry path does not resolve to an existing Rule file")
 
-    _, decisions, findings = canonical_contract(schema)
-    for state_id, decision in decisions.items():
-        if decision not in ALLOWED_DECISIONS:
-            errors.append(f"canonical decision for {state_id} is invalid")
-    for state in states.values() if isinstance(states, dict) else []:
-        if isinstance(state, dict):
-            state_id = state.get("state")
-            if state_id in decisions and state.get("decision", decisions[state_id]) != decisions[state_id]:
-                errors.append(f"Rule-local decision for {state_id} conflicts with canonical decision")
-            if state_id in findings and state.get("finding_generated", findings[state_id]) != findings[state_id]:
-                errors.append(f"Rule-local finding_generated for {state_id} conflicts with canonical contract")
     return errors
 
 
@@ -178,7 +206,7 @@ def main() -> int:
 
     global_errors: list[str] = []
     try:
-        schema = json.loads(args.schema.resolve().read_text(encoding="utf-8"))
+        schema = load_contract_schema(args.schema.resolve())
         global_errors.extend(validate_global_contract(schema))
     except Exception as exc:
         global_errors.append(f"boundary schema error: {exc}")

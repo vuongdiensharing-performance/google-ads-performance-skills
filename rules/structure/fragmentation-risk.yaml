@@ -1,6 +1,6 @@
 id: STR-FRAG-001
 name: Campaign Fragmentation Risk
-version: 1.1.0
+version: 1.1.1
 category: structure
 description: Flag excessive campaign or ad-group fragmentation when a normalized fragmentation-risk signal is present and no valid control or reporting requirement justifies the separation.
 when:
@@ -50,12 +50,12 @@ boundary_contract:
     - volume_or_conversion_density
     - separation_reason
   states:
-    A: {state: APPLICABLE_VALID}
-    B: {state: APPLICABLE_TRIGGERED}
-    C: {state: APPLICABLE_MISSING_EVIDENCE}
-    D: {state: NOT_APPLICABLE}
-    E: {state: CONFLICTING_EVIDENCE}
-    F: {state: EXPLICIT_EXCLUSION}
+    A: {state: APPLICABLE_VALID, decision: PASS, finding_generated: false}
+    B: {state: APPLICABLE_TRIGGERED, decision: FAIL, finding_generated: true}
+    C: {state: APPLICABLE_MISSING_EVIDENCE, decision: INSUFFICIENT_EVIDENCE, finding_generated: false}
+    D: {state: NOT_APPLICABLE, decision: NOT_APPLICABLE, finding_generated: false}
+    E: {state: CONFLICTING_EVIDENCE, decision: POLICY_DEFINED, finding_generated: false}
+    F: {state: EXPLICIT_EXCLUSION, decision: SUPPRESSED, finding_generated: false}
   conflict_policy:
     enabled: true
     when:

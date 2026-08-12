@@ -5,26 +5,7 @@
   "type": "object",
   "required": ["boundary_contract", "resolution_precedence"],
   "properties": {
-    "boundary_contract": {
-      "type": "object",
-      "required": ["version", "states"],
-      "properties": {
-        "version": {"type": "string"},
-        "states": {
-          "type": "object",
-          "required": ["A", "B", "C", "D", "E", "F"],
-          "additionalProperties": false,
-          "properties": {
-            "A": {"$ref": "#/$defs/state"},
-            "B": {"$ref": "#/$defs/state"},
-            "C": {"$ref": "#/$defs/state"},
-            "D": {"$ref": "#/$defs/state"},
-            "E": {"$ref": "#/$defs/state"},
-            "F": {"$ref": "#/$defs/state"}
-          }
-        }
-      }
-    },
+    "boundary_contract": {"$ref": "#/$defs/boundaryContract"},
     "resolution_precedence": {
       "type": "array",
       "const": [
@@ -37,28 +18,82 @@
       ]
     }
   },
+  "additionalProperties": false,
   "$defs": {
+    "stateId": {
+      "enum": [
+        "APPLICABLE_VALID",
+        "APPLICABLE_TRIGGERED",
+        "APPLICABLE_MISSING_EVIDENCE",
+        "NOT_APPLICABLE",
+        "CONFLICTING_EVIDENCE",
+        "EXPLICIT_EXCLUSION"
+      ]
+    },
+    "decision": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "SUPPRESSED",
+        "NOT_APPLICABLE",
+        "INSUFFICIENT_EVIDENCE",
+        "POLICY_DEFINED"
+      ]
+    },
     "state": {
       "type": "object",
-      "required": ["id", "decision", "finding_generated"],
+      "required": ["state", "decision", "finding_generated"],
       "properties": {
-        "id": {
-          "enum": [
-            "APPLICABLE_VALID",
-            "APPLICABLE_TRIGGERED",
-            "APPLICABLE_MISSING_EVIDENCE",
-            "NOT_APPLICABLE",
-            "CONFLICTING_EVIDENCE",
-            "EXPLICIT_EXCLUSION"
-          ]
-        },
-        "decision": {"type": "string"},
+        "state": {"$ref": "#/$defs/stateId"},
+        "decision": {"$ref": "#/$defs/decision"},
         "finding_generated": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "conflictPolicy": {
+      "type": "object",
+      "required": ["enabled", "when", "resolution"],
+      "properties": {
+        "enabled": {"const": true},
+        "when": {"type": "object", "minProperties": 1},
+        "resolution": {
+          "type": "object",
+          "required": ["state", "decision", "inference_used"],
+          "properties": {
+            "state": {"const": "CONFLICTING_EVIDENCE"},
+            "decision": {"$ref": "#/$defs/decision"},
+            "inference_used": {"const": false}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "boundaryContract": {
+      "type": "object",
+      "required": ["version", "applicable_when", "evidence_required", "states", "conflict_policy"],
+      "properties": {
+        "version": {"const": "1.0.0"},
+        "applicable_when": {"type": "array", "minItems": 1},
+        "evidence_required": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "states": {
+          "type": "object",
+          "required": ["A", "B", "C", "D", "E", "F"],
+          "additionalProperties": false,
+          "properties": {
+            "A": {"$ref": "#/$defs/state"},
+            "B": {"$ref": "#/$defs/state"},
+            "C": {"$ref": "#/$defs/state"},
+            "D": {"$ref": "#/$defs/state"},
+            "E": {"$ref": "#/$defs/state"},
+            "F": {"$ref": "#/$defs/state"}
+          }
+        },
+        "conflict_policy": {"$ref": "#/$defs/conflictPolicy"}
       },
       "additionalProperties": false
     }
   },
-  "additionalProperties": false,
   "x-canonical-resolution-precedence": [
     "NOT_APPLICABLE",
     "APPLICABLE_MISSING_EVIDENCE",

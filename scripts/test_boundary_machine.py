@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Execute the 36 Gate 2C Boundary fixtures and determinism assertions."""
+"""Execute the 36 Gate 2C Boundary fixtures and optional determinism assertions."""
 
 from __future__ import annotations
 
@@ -28,8 +28,8 @@ def main() -> int:
     parser.add_argument("--fixtures", type=Path, default=ROOT / "evals/account-audit/boundary_matrix.yaml")
     parser.add_argument("--runs", type=int, default=5)
     args = parser.parse_args()
-    if args.runs < 2:
-        print("FAIL --runs must be >= 2 for determinism testing")
+    if args.runs < 1:
+        print("FAIL --runs must be >= 1")
         return 1
 
     schema = json.loads((ROOT / "schemas/boundary-contract.json").read_text(encoding="utf-8"))
@@ -106,7 +106,7 @@ def main() -> int:
         observed = [evaluate_rule(rule, case["context"])["boundary"] for _ in range(args.runs)]
         first = observed[0]
 
-        if any(item != first for item in observed[1:]):
+        if args.runs >= 2 and any(item != first for item in observed[1:]):
             failures += 1
             print(f"FAIL {case['case_id']}: non-deterministic boundary result")
             continue
