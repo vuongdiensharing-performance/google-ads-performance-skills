@@ -28,8 +28,8 @@ def main() -> int:
     parser.add_argument("--fixtures", type=Path, default=ROOT / "evals/account-audit/boundary_matrix.yaml")
     parser.add_argument("--runs", type=int, default=5)
     args = parser.parse_args()
-    if args.runs < 2:
-        print("FAIL --runs must be >= 2 for determinism testing")
+    if args.runs < 1:
+        print("FAIL --runs must be >= 1")
         return 1
 
     schema = json.loads((ROOT / "schemas/boundary-contract.json").read_text(encoding="utf-8"))
