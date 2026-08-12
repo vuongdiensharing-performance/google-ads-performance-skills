@@ -40,7 +40,7 @@ class GA4QueryContractTests(unittest.TestCase):
         )
         self.assertTrue(errors)
         self.assertIsNone(canonical)
-        self.assertTrue(any("additional properties" in error for error in errors))
+        self.assertTrue(any("additional properties" in error.lower() for error in errors))
 
     def test_unknown_filter_is_rejected(self):
         errors, canonical = validate(
@@ -48,7 +48,7 @@ class GA4QueryContractTests(unittest.TestCase):
         )
         self.assertTrue(errors)
         self.assertIsNone(canonical)
-        self.assertTrue(any("additional properties" in error for error in errors))
+        self.assertTrue(any("additional properties" in error.lower() for error in errors))
 
     def test_unknown_query_id_is_rejected(self):
         contract = self.fixture("ga4_query_contract.yaml")
