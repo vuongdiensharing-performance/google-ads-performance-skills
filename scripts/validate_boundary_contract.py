@@ -93,6 +93,23 @@ def validate_registry(registry: dict[str, Any]) -> list[str]:
     return errors
 
 
+def validate_state_mappings(states: Any, schema: dict[str, Any]) -> list[str]:
+    errors: list[str] = []
+    _, decisions, findings = canonical_contract(schema)
+    if not isinstance(states, dict) or tuple(states.keys()) != STATE_KEYS:
+        return ["boundary_contract.states must declare exactly A, B, C, D, E, F"]
+    for key, expected_id in EXPECTED_STATE_IDS.items():
+        state = states.get(key)
+        if not isinstance(state, dict) or state.get("state") != expected_id:
+            errors.append(f"state {key} must map to {expected_id}")
+            continue
+        if state.get("decision") != decisions[expected_id]:
+            errors.append(f"Rule-local decision for {expected_id} conflicts with canonical decision")
+        if state.get("finding_generated") != findings[expected_id]:
+            errors.append(f"Rule-local finding_generated for {expected_id} conflicts with canonical contract")
+    return errors
+
+
 def validate_rule(rule_path: Path, registry: dict[str, Any], schema: dict[str, Any]) -> list[str]:
     errors: list[str] = []
     try:
@@ -121,13 +138,7 @@ def validate_rule(rule_path: Path, registry: dict[str, Any], schema: dict[str, A
         errors.append("boundary_contract.evidence_required must exactly mirror Rule evidence_required")
 
     states = contract.get("states")
-    if not isinstance(states, dict) or tuple(states.keys()) != STATE_KEYS:
-        errors.append("boundary_contract.states must declare exactly A, B, C, D, E, F")
-    else:
-        for key, expected_id in EXPECTED_STATE_IDS.items():
-            state = states.get(key)
-            if not isinstance(state, dict) or state.get("state") != expected_id:
-                errors.append(f"state {key} must map to {expected_id}")
+    errors.extend(validate_state_mappings(states, schema))
 
     conflict = contract.get("conflict_policy")
     if not isinstance(conflict, dict) or conflict.get("enabled") is not True:
@@ -182,15 +193,6 @@ def validate_rule(rule_path: Path, registry: dict[str, Any], schema: dict[str, A
         if not (ROOT / entry.get("path", "")).is_file():
             errors.append("registry path does not resolve to an existing Rule file")
 
-    _, decisions, findings = canonical_contract(schema)
-    if isinstance(states, dict):
-        for state in states.values():
-            if isinstance(state, dict):
-                state_id = state.get("state")
-                if state_id in decisions and state.get("decision", decisions[state_id]) != decisions[state_id]:
-                    errors.append(f"Rule-local decision for {state_id} conflicts with canonical decision")
-                if state_id in findings and state.get("finding_generated", findings[state_id]) != findings[state_id]:
-                    errors.append(f"Rule-local finding_generated for {state_id} conflicts with canonical contract")
     return errors
 
 
